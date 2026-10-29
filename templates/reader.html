@@ -407,6 +407,93 @@ body.zh-hide .math .m-zh { display: none; }
   .brand span { display: none; }
 }
 @media (max-width: 420px) { .seg button { padding: 0 7px; } }
+/* ================================================================ kind themes
+   book: the defaults above. paper: an academic page (white, ink blue, a Charter-like serif, three-line
+   tables). filing: a financial report (cool grey, navy, sans serif as in a 10-K, statement tables). */
+:root[data-kind="paper"] {
+  --bg: #fafaf8; --surface: #ffffff; --surface-2: #f2f3f5; --text: #16181d; --text-2: #4a4f59; --text-3: #8a8f99;
+  --border: #e4e5e8; --border-strong: #c9ccd2; --accent: #2a4f8f; --accent-soft: #eef2f9; --accent-text: #23467f;
+  --term-mark: #e8eefb; --shadow: none;
+  --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, "Source Serif 4", Georgia, "Noto Serif SC", serif;
+}
+:root[data-kind="filing"] {
+  --bg: #f3f5f8; --surface: #ffffff; --surface-2: #f0f3f7; --text: #0f1b2d; --text-2: #46546a; --text-3: #8592a6;
+  --border: #dfe4eb; --border-strong: #c6cfdb; --accent: #0b4f8a; --accent-soft: #e8f0f9; --accent-text: #0a457a;
+  --term-mark: #fff3c4; --bad: #c0392b; --shadow: 0 1px 2px rgba(15, 27, 45, .06);
+  --serif: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --note-bg: #fbf6ea; --note-bar: #b7791f; --th-bg: #0b4f8a;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-kind="paper"]:not([data-theme="light"]) {
+    --bg: #121418; --surface: #181b20; --surface-2: #20242a; --text: #e6e7ea; --text-2: #b3b8c2; --text-3: #7f8590;
+    --border: #2a2e35; --border-strong: #3a3f47; --accent: #7ea2e0; --accent-soft: #1c2638; --accent-text: #a9c1ee; --term-mark: #26314a;
+  }
+  :root[data-kind="filing"]:not([data-theme="light"]) {
+    --bg: #0e141c; --surface: #151d27; --surface-2: #1a2430; --text: #e3e8ef; --text-2: #a9b4c3; --text-3: #748296;
+    --border: #26313f; --border-strong: #364456; --accent: #5aa2e6; --accent-soft: #16283c; --accent-text: #8cc0f0;
+    --term-mark: #3d3518; --bad: #f08c78; --note-bg: #2a2416; --note-bar: #d9a441; --th-bg: #1d4a78;
+  }
+}
+:root[data-kind="paper"][data-theme="dark"] {
+  --bg: #121418; --surface: #181b20; --surface-2: #20242a; --text: #e6e7ea; --text-2: #b3b8c2; --text-3: #7f8590;
+  --border: #2a2e35; --border-strong: #3a3f47; --accent: #7ea2e0; --accent-soft: #1c2638; --accent-text: #a9c1ee; --term-mark: #26314a;
+}
+:root[data-kind="filing"][data-theme="dark"] {
+  --bg: #0e141c; --surface: #151d27; --surface-2: #1a2430; --text: #e3e8ef; --text-2: #a9b4c3; --text-3: #748296;
+  --border: #26313f; --border-strong: #364456; --accent: #5aa2e6; --accent-soft: #16283c; --accent-text: #8cc0f0;
+  --term-mark: #3d3518; --bad: #f08c78; --note-bg: #2a2416; --note-bar: #d9a441; --th-bg: #1d4a78;
+}
+
+/* ---------- paper */
+[data-kind="paper"] .chapter-head { text-align: center; }
+[data-kind="paper"] .chapter-head h1 { font-weight: 700; font-size: 32px; }
+[data-kind="paper"] .chapter-head .authors { margin-top: 10px; font: italic 16px/1.5 var(--serif); color: var(--text-2); }
+[data-kind="paper"] .chapter-head .stats { justify-content: center; }
+[data-kind="paper"] .guide { border-radius: 4px; border: 0; border-left: 3px solid var(--accent); background: var(--surface); }
+[data-kind="paper"] .h1 { border-top: 1px solid var(--border-strong); padding-top: 14px; }
+[data-kind="paper"] .h1 .num { font: 700 17px/1 var(--serif); color: var(--accent); letter-spacing: 0; }
+[data-kind="paper"] .h1 h2 { font-variant: small-caps; letter-spacing: .02em; font-weight: 700; }
+[data-kind="paper"] .h1.abstract { border-top: 0; text-align: center; margin-top: 28px; }
+[data-kind="paper"] .h1.abstract h2 { font-size: 20px; letter-spacing: .08em; }
+[data-kind="paper"] .h2 .badge { background: transparent; color: var(--accent); padding: 0; min-width: 0; font: 700 17px/1.35 var(--serif); margin-top: 0; }
+[data-kind="paper"] .para { border-radius: 4px; }
+[data-kind="paper"] .en { text-align: justify; hyphens: auto; }
+[data-kind="paper"] .note.econ { background: transparent; border-left: 2px solid var(--accent); border-radius: 0; padding: 4px 0 4px 12px; color: var(--text-2); }
+[data-kind="paper"] .note.econ .tag { background: transparent; color: var(--accent); border: 1px solid currentColor; }
+[data-kind="paper"] .fig-card { border-radius: 4px; }
+[data-kind="paper"] .fig-card .tc-note { background: transparent; border-left: 2px solid var(--accent); border-radius: 0; }
+[data-kind="paper"] .fig-card .tc-note .tag { background: transparent; color: var(--accent); border: 1px solid currentColor; }
+[data-kind="paper"] .fig-card .tc-label { letter-spacing: .04em; font: 700 13px/1.3 var(--serif); }
+[data-kind="paper"] .tbl-wrap { border-top: 1.5px solid var(--text); border-bottom: 1.5px solid var(--text); margin: 0 18px; }
+[data-kind="paper"] table.grid { font-family: var(--serif); }
+[data-kind="paper"] table.grid th { background: transparent; border-bottom: 1px solid var(--text); }
+[data-kind="paper"] table.grid td { border-bottom: 0; }
+[data-kind="paper"] table.grid td:first-child, [data-kind="paper"] table.grid th:first-child { box-shadow: none; }
+
+/* ---------- filing */
+[data-kind="filing"] .en, [data-kind="filing"] .zh, [data-kind="filing"] .note { font-variant-numeric: tabular-nums; }
+[data-kind="filing"] .en { font-size: calc(var(--fs) - 1px); line-height: 1.6; }
+[data-kind="filing"] .chapter-head h1 { font-weight: 700; letter-spacing: -.015em; }
+[data-kind="filing"] .eyebrow { color: var(--accent); }
+[data-kind="filing"] .guide { border-radius: 8px; border-top: 3px solid var(--accent); }
+[data-kind="filing"] .h1 { border-top: 3px solid var(--accent); }
+[data-kind="filing"] .h1 .num:not(:empty) { display: inline-block; padding: 4px 8px; border-radius: 4px; background: var(--accent); color: #fff; letter-spacing: .04em; }
+[data-kind="filing"] .h1 h2 { font-weight: 700; }
+[data-kind="filing"] .h2 h3 { font-weight: 700; }
+[data-kind="filing"] .para { border-radius: 8px; }
+[data-kind="filing"] .note.econ { background: var(--note-bg); border-left: 3px solid var(--note-bar); border-radius: 0 8px 8px 0; }
+[data-kind="filing"] .note.econ .tag { background: var(--note-bar); }
+[data-kind="filing"] .note.econ strong { color: var(--text); }
+[data-kind="filing"] .fig-card { border-radius: 8px; }
+[data-kind="filing"] .fig-card .tc-note { background: var(--note-bg); border-left: 3px solid var(--note-bar); border-radius: 0 8px 8px 0; }
+[data-kind="filing"] .fig-card .tc-note .tag { background: var(--note-bar); }
+[data-kind="filing"] table.grid th { background: var(--th-bg); color: #fff; border-bottom-color: var(--th-bg); }
+[data-kind="filing"] table.grid th .g-zh { color: rgba(255, 255, 255, .78); }
+[data-kind="filing"] table.grid th:first-child { background: var(--th-bg); }
+[data-kind="filing"] table.grid tr.alt td { background: var(--surface-2); }
+[data-kind="filing"] table.grid tr.sec td { color: var(--text-2); font-weight: 600; padding-top: 10px; }
+[data-kind="filing"] table.grid tr.total td { font-weight: 700; border-top: 1.5px solid var(--text-2); }
+[data-kind="filing"] table.grid .neg { color: var(--bad); }
 .empty { max-width: 560px; margin: 80px auto; text-align: center; color: var(--text-2); }
 .footer-note { max-width: 720px; margin-top: 56px; font-size: 12px; color: var(--text-3); }
 </style>
@@ -464,13 +551,25 @@ body.zh-hide .math .m-zh { display: none; }
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const md = s => esc(s || "").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   const NOTE_LABEL = BOOK.note_label || "解读";
-  const PAPER = BOOK.kind === "paper" || BOOK.kind === "filing";  // no chapter numbers (a paper, a filing's Items)
+  const KIND = BOOK.kind || "book";
+  document.documentElement.dataset.kind = KIND;  // the kind themes in the stylesheet
+  const PAPER = KIND === "paper" || KIND === "filing";  // no chapter numbers (a paper, a filing's Items)
+  const FORM = (BOOK.title.match(/Form\s+(10-K|10-Q|20-F|40-F|8-K)/i) || [])[1];
   const chapName = ch => PAPER ? ch.title_zh : `第${ch.number}章　${ch.title_zh}`;
   // a table as cells: the English cell, its translation under it when it has one; numbers right-aligned
   const NUM = /^[\s\d.,:%±+\-−–—×()\[\]†‡*\/<>=~$€£¥]*$/;
-  const gridHTML = g => `<div class="tbl-wrap"><table class="grid${g.rows.some(r => r.reduce((n, c) => n + c.span, 0) >= 6) ? " wide" : ""}">${g.rows.map((row, i) => `<tr>${row.map(c => {
-    const tag = i < g.header ? "th" : "td", num = c.en.trim() && NUM.test(c.en);
-    return `<${tag}${c.span > 1 ? ` colspan="${c.span}"` : ""}${num ? ' class="num"' : ""}><div class="g-en">${esc(c.en)}</div>`
+  const secRow = row => /:$/.test(row[0].en.trim()) && row.slice(1).every(c => !c.en.trim());  // "Current assets:"
+  const headRow = (row, i, g) => i < g.header && !secRow(row);
+  const rowClass = (row, i, g) => {
+    if (headRow(row, i, g)) return "";
+    if (secRow(row)) return "sec";
+    const label = row[0].en.trim();
+    if (/^(Total\b|Net income|Net sales$|Gross margin$|Operating income|Income before|Cash generated|Cash used)/i.test(label)) return "total";
+    return (i - g.header) % 2 ? "alt" : "";
+  };
+  const gridHTML = g => `<div class="tbl-wrap"><table class="grid${g.rows.some(r => r.reduce((n, c) => n + c.span, 0) >= 6) ? " wide" : ""}">${g.rows.map((row, i) => `<tr class="${rowClass(row, i, g)}">${row.map(c => {
+    const tag = headRow(row, i, g) ? "th" : "td", num = c.en.trim() && NUM.test(c.en), neg = num && /\(\s*[\d.,]+\s*\)/.test(c.en);
+    return `<${tag}${c.span > 1 ? ` colspan="${c.span}"` : ""}${num ? ` class="num${neg ? " neg" : ""}"` : ""}><div class="g-en">${esc(c.en)}</div>`
       + `${c.zh && c.zh !== c.en ? `<div class="g-zh">${md(c.zh)}</div>` : ""}</${tag}>`;
   }).join("")}</tr>`).join("")}</table></div>`;
   document.title = `${BOOK.title_zh || BOOK.title} · 双语精读`;
@@ -571,7 +670,7 @@ body.zh-hide .math .m-zh { display: none; }
   function blockHTML(ch, b) {
     switch (b.type) {
       case "heading":
-        if (b.level === 1) return `<div class="h1" id="${b.id}"><div class="num">${esc(b.num)}</div><h2>${esc(b.text)}</h2><div class="zh">${esc(b.zh)}</div></div>`;
+        if (b.level === 1) return `<div class="h1${/^abstract$/i.test(b.text.trim()) ? " abstract" : ""}" id="${b.id}"><div class="num">${esc(b.num)}</div><h2>${esc(b.text)}</h2><div class="zh">${esc(b.zh)}</div></div>`;
         { const m = b.text.match(/^Principle (\d+):\s*(.*)$/);
           const badge = m ? "原理 " + m[1] : esc(b.num);
           return `<div class="h2" id="${b.id}">${badge ? `<span class="badge">${badge}</span>` : ""}<div><h3>${esc(m ? m[2] : b.text)}</h3><div class="zh">${esc(b.zh.replace(/^原理[一二三四五六七八九十]+：/, ""))}</div></div></div>`; }
@@ -719,9 +818,12 @@ body.zh-hide .math .m-zh { display: none; }
     const countFigs = bs => bs.reduce((n, b) => n + (b.type === "figure" || b.type === "table" ? 1 : 0)
       + (b.type === "box" ? countFigs(b.blocks) : 0), 0);  // figures inside boxes count too
     const nFig = countFigs(ch.blocks.concat(appendix));
-    let h = `<div id="top" class="chapter-head"><div class="eyebrow">Chapter ${ch.number}</div><h1>${esc(ch.title)}</h1>
+    const eyebrow = KIND === "paper" ? "Research Paper · 研究论文"
+      : KIND === "filing" ? `${FORM ? "Form " + FORM : "Annual Report"} · Item ${ch.number}` : `Chapter ${ch.number}`;
+    let h = `<div id="top" class="chapter-head"><div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(ch.title)}</h1>
       <div class="zh-title">${esc(ch.title_zh)}</div>
-      <div class="stats">${ch.pages[0] != null ? `<span>原书 p.${ch.pages[0]}–${ch.pages[1]}</span>` : ""}<span>${paras.length} 段 · ${nSent} 句</span><span>${ch.glossary.length} 个术语</span>${nFig ? `<span>${nFig} 个图表</span>` : ""}${appendix.length ? `<span>含附录</span>` : ""}</div>
+      ${KIND === "paper" && BOOK.author ? `<div class="authors">${esc(BOOK.author)}</div>` : ""}
+      <div class="stats">${ch.pages[0] != null ? `<span>原书 p.${ch.pages[0]}–${ch.pages[1]}</span>` : ""}<span>${paras.length} 段 · ${nSent} 句</span>${ch.glossary.length ? `<span>${ch.glossary.length} 个术语</span>` : ""}${nFig ? `<span>${nFig} 个图表</span>` : ""}${appendix.length ? `<span>含附录</span>` : ""}</div>
       <button class="resume" id="resume"></button></div>`;
     if (ch.guide && ch.guide.length) h += `<div class="guide"><h3>${BOOK.kind === "paper" ? "导读" : "本章导读"}</h3>${ch.guide.map(p => `<p>${md(p)}</p>`).join("")}</div>`;
     h += ch.blocks.map(b => blockHTML(ch, b)).join("");

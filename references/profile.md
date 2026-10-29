@@ -5,7 +5,7 @@ Everything specific to one book lives here; the scripts hold no book-specific va
 ## book
 | key | meaning |
 | --- | --- |
-| `kind` | `book` (default), `paper` or `filing` (an HTML financial report; see annotation-filing.md). A paper or a filing shows no chapter numbers. For `paper`: a paper is one chapter, the reader and EPUB show no chapter numbers, and its annotation standard is in annotation-paper.md |
+| `kind` | `book` (default), `paper` or `filing` (an HTML financial report; see annotation-filing.md). A paper or a filing shows no chapter numbers, and each kind has its own look in the reader and the EPUB: book (warm paper, teal, serif cards), paper (white page, ink blue, Charter-like serif, centred title with authors, three-line tables, side-rule notes), filing (cool grey, navy, sans serif with tabular figures, navy table headers, banded rows, bold totals, red negatives, amber analyst notes). For `paper`: a paper is one chapter, the reader and EPUB show no chapter numbers, and its annotation standard is in annotation-paper.md |
 | `title`, `title_zh`, `author` | shown in the reader, the EPUB title page and metadata |
 | `subject` | 经济学, 心理学 …; notes are labelled `<subject><notes.label>` (经济学解读) |
 | `source_note` | HTML line under every chapter and on the EPUB title page: source and 仅供个人学习使用，请勿传播 |

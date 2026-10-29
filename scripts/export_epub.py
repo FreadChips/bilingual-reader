@@ -26,7 +26,8 @@ BOOK = None  # set in main()
 ROOT = DATA = OUT = BOOK_ID = None
 NOTE = "解读"  # label of the subject notes, e.g. 经济学解读
 SUBJECT = ""
-PAPER = False  # book.kind == "paper": one chapter, no chapter numbers
+PAPER = False  # book.kind is "paper" or "filing": no chapter numbers
+KIND = "book"
 
 
 def chap_name(ch):
@@ -159,6 +160,8 @@ class Chapter:
                 h += "<tr>"
                 for c in row:
                     span = ' colspan="%d"' % c["span"] if c["span"] > 1 else ""
+                    if c["en"].strip() and re.fullmatch(r"[\s\d.,:%±+\-−–—×()\[\]†‡*/<>=~$€£¥]*", c["en"]):
+                        span += ' class="num"'
                     zh = f'<br/><span class="zh">{md(c["zh"])}</span>' if c["zh"] and c["zh"] != c["en"] else ""
                     h += f"<{tag_}{span}>{esc(c['en'])}{zh}</{tag_}>"
                 h += "</tr>"
@@ -466,7 +469,38 @@ table.grid .zh { font-size: 0.9em; color: #555; }
 .subtitle { font-size: 1.05em; margin: 0.6em 0; }
 .legal { font-size: 0.78em; opacity: 0.75; margin-top: 2em; }
 a { color: #2a7a72; text-decoration: none; }
+table.grid .num { text-align: right; white-space: nowrap; }
 """
+
+# Added to CSS for a paper (academic: ink blue, serif, three-line tables) or a filing (navy, sans serif,
+# statement tables, amber analyst notes); the reader page has the matching themes.
+KIND_CSS = {
+    "paper": """
+body { font-family: Charter, "Bitstream Charter", Cambria, Georgia, serif; }
+h1, .chap-head { text-align: center; }
+h2 { border-top: 1px solid #9aa4b5; font-variant: small-caps; }
+.num, .eyebrow, .guide-title, .fig-label, a, .gloss dt.letter { color: #2a4f8f; }
+.guide { border-left-color: #2a4f8f; background: rgba(42,79,143,0.06); }
+.tag { background: #2a4f8f; }
+.note.econ { border-left: 2px solid #2a4f8f; background: transparent; }
+.en { text-align: justify; }
+table.grid { border-top: 1.5px solid #222; border-bottom: 1.5px solid #222; }
+table.grid th { background: transparent; border-bottom: 1px solid #222; }
+table.grid td { border-bottom: 0; }
+""",
+    "filing": """
+body { font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+h2 { border-top: 3px solid #0b4f8a; }
+.num, .eyebrow, .guide-title, .fig-label, a, .gloss dt.letter { color: #0b4f8a; }
+.guide { border-left-color: #0b4f8a; background: rgba(11,79,138,0.05); }
+.tag { background: #0b4f8a; }
+.note.econ { border-left: 3px solid #b7791f; background: rgba(183,121,31,0.08); }
+.note.econ .tag { background: #b7791f; }
+table.grid th { background: #0b4f8a; color: #fff; }
+table.grid th .zh { color: #dfe8f2; }
+table.grid tr:nth-child(even) td { background: rgba(11,79,138,0.04); }
+""",
+}
 
 
 def nav_doc(entries, first, glossary):
@@ -497,7 +531,7 @@ def ncx_doc(entries, title):
 
 
 def main():
-    global BOOK, ROOT, DATA, OUT, BOOK_ID, NOTE, SUBJECT, PAPER
+    global BOOK, ROOT, DATA, OUT, BOOK_ID, NOTE, SUBJECT, PAPER, KIND
     sys.stdout.reconfigure(encoding="utf-8")
     BOOK, _ = open_book(sys.argv[1:])
     b = BOOK.cfg["book"]
@@ -506,7 +540,8 @@ def main():
     # a stable identifier, so a reading app treats a re-export as the same book
     BOOK_ID = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, b.get("epub_id") or f'readpdf/{b["epub_name"]}'))
     NOTE, SUBJECT = BOOK.cfg["notes"]["label"], b["subject"]
-    PAPER = b.get("kind") in ("paper", "filing")
+    KIND = b.get("kind") or "book"
+    PAPER = KIND in ("paper", "filing")
     book = load_js(DATA / "book.js", "BOOK_INDEX")
     img = Images()
     chapters = [Chapter(load_js(DATA / f'{c["id"]}.js', "BOOK_DATA["), img) for c in book["chapters"] if c["available"]]
@@ -557,7 +592,7 @@ def main():
                    "</rootfiles></container>", compress_type=zipfile.ZIP_DEFLATED)
         z.writestr("OEBPS/content.opf", opf, compress_type=zipfile.ZIP_DEFLATED)
         z.writestr("OEBPS/toc.ncx", ncx_doc(toc, title), compress_type=zipfile.ZIP_DEFLATED)
-        z.writestr("OEBPS/style.css", CSS, compress_type=zipfile.ZIP_DEFLATED)
+        z.writestr("OEBPS/style.css", CSS + KIND_CSS.get(KIND, ""), compress_type=zipfile.ZIP_DEFLATED)
         z.writestr("OEBPS/img/cover.png", cover_png(book), compress_type=zipfile.ZIP_STORED)
         for name, text in docs.items():
             z.writestr(f"OEBPS/{name}", text, compress_type=zipfile.ZIP_DEFLATED)
