@@ -21,7 +21,7 @@ from pathlib import Path
 import yaml
 
 DEFAULTS = {
-    "book": {"title": "", "title_zh": "", "author": "", "subject": "", "source_note": "",
+    "book": {"kind": "book", "title": "", "title_zh": "", "author": "", "subject": "", "source_note": "",
              "epub_name": "bilingual-reader"},
     "source": {"type": "pdf", "file": ""},
     "chapters": {"outline_pattern": r"^Chapter (\d+):\s*(.*)", "titles_zh": {}},

@@ -213,7 +213,7 @@ def write_index():
         chapters.append({"id": cid, "number": num, "title": src_titles.get(num, ""), "title_zh": BOOK.title_zh(num),
                          "available": (OUT / f"{cid}.js").exists()})
     b = BOOK.cfg["book"]
-    index = {"title": b["title"], "title_zh": b["title_zh"], "author": b["author"], "subject": b["subject"],
+    index = {"kind": b["kind"], "title": b["title"], "title_zh": b["title_zh"], "author": b["author"], "subject": b["subject"],
              "note_label": f'{b["subject"]}{BOOK.cfg["notes"]["label"]}', "source_note": b["source_note"],
              "storage_key": b.get("storage_key") or b["epub_name"],
              "chapters": chapters}

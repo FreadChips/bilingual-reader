@@ -1,6 +1,6 @@
 """Set up a book folder for the bilingual-reader toolkit.
 
-Usage: python new_book.py DIR SOURCE.pdf|SOURCE.epub [--subject 经济学]
+Usage: python new_book.py DIR SOURCE.pdf|SOURCE.epub [--subject 经济学] [--kind book|paper]
 
 Copies the source into DIR, creates the folder layout, the reader page, a draft book.yaml and
 NOTES.md (status and hand-over notes for whichever agent works on the book next).
@@ -16,6 +16,14 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))  # run with python -I, which leaves out the script's folder
+
+
+# per kind: the draft annotation standard (agree it with the user before chapter 1)
+KINDS = {
+    "book": {"focus": "", "density": 17},
+    "paper": {"focus": "问题与贡献、方法原理、实验怎么读、背景与后续影响（references/annotation-paper.md）",
+              "density": 25},
+}
 
 
 def guess_chapter_pattern(labels):
@@ -34,11 +42,19 @@ def main():
     args = sys.argv[1:]
     if len(args) < 2:
         sys.exit(__doc__)
-    subject = "经济学"
+    subject, kind = None, "book"
     if "--subject" in args:
         i = args.index("--subject")
         subject = args[i + 1]
         del args[i:i + 2]
+    if "--kind" in args:
+        i = args.index("--kind")
+        kind = args[i + 1]
+        del args[i:i + 2]
+    if kind not in KINDS:
+        sys.exit(f"--kind must be one of {', '.join(KINDS)}")
+    if subject is None:
+        subject = "经济学" if kind == "book" else ""
     root, src = Path(args[0]).resolve(), Path(args[1]).resolve()
     kind = src.suffix.lower().lstrip(".")
     if kind not in ("pdf", "epub"):
@@ -66,13 +82,15 @@ def main():
         report = subprocess.run([sys.executable, "-I", str(HERE / "font_profile.py"), str(root / src.name)],
                                 capture_output=True, text=True, encoding="utf-8")
         (root / "font_profile.txt").write_text(report.stdout + report.stderr, encoding="utf-8")
-    pattern = guess_chapter_pattern(labels) if labels else ""  # no outline: the whole PDF is one chapter
+    # no outline, or a paper (whose outline lists its sections): the whole document is one chapter
+    pattern = guess_chapter_pattern(labels) if labels and kind == "book" else ""
     slug = re.sub(r"[^A-Za-z0-9]+", "-", title).strip("-")[:60] or "book"
 
     template = (HERE.parent / "templates" / f"book-{kind}.yaml").read_text(encoding="utf-8")
     text = (template.replace("{{title}}", yaml_str(title)).replace("{{author}}", yaml_str(author))
             .replace("{{subject}}", subject).replace("{{file}}", yaml_str(src.name))
-            .replace("{{pattern}}", yaml_str(pattern)).replace("{{slug}}", slug))
+            .replace("{{pattern}}", yaml_str(pattern)).replace("{{slug}}", slug).replace("{{kind}}", kind)
+            .replace("{{focus}}", yaml_str(KINDS[kind]["focus"])).replace("{{density}}", str(KINDS[kind]["density"])))
     (root / "book.yaml").write_text(text, encoding="utf-8")
     notes = (HERE.parent / "templates" / "NOTES.md").read_text(encoding="utf-8")
     (root / "NOTES.md").write_text(notes.replace("{{title}}", title), encoding="utf-8")
@@ -87,7 +105,8 @@ def main():
         for l in matched[:5]:
             print(f"  {l}")
     else:
-        print("no outline: the whole document is one chapter (chapter 1); fill in book.title")
+        print("one chapter: the whole document is chapter 1" + ("" if kind == "paper" else " (no outline)")
+              + "; check book.title")
     if kind == "pdf":
         print("next: copy any symbol fonts from font_profile.txt into layout.symbol_fonts; no other layout rules are needed")
     print("fill in book.yaml's annotation: section with the user before chapter 1")

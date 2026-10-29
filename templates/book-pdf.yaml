@@ -3,6 +3,7 @@
 # figures and boxes; corrections go into labels/chNN.yaml (references/auto-layout.md).
 
 book:
+  kind: {{kind}}                     # book | paper (a paper is one chapter; see references/annotation-paper.md)
   title: {{title}}
   title_zh: ''                       # 中文书名
   author: {{author}}
@@ -11,8 +12,8 @@ book:
   epub_name: {{slug}}-bilingual
 
 annotation:                          # the agreed annotation standard; agree it with the user before chapter 1
-  focus: ''                          # what the notes explain, e.g. 经济学优先：概念、机制、常见误解、读图方法、与其他章的联系
-  notes_per_100: 17                  # target subject notes per 100 sentences; hold it on every chapter
+  focus: {{focus}}                   # what the notes explain, e.g. 经济学优先：概念、机制、常见误解、读图方法、与其他章的联系
+  notes_per_100: {{density}}                  # target subject notes per 100 sentences; hold it on every chapter
   lang_notes: ''                     # when a language note is worth writing (the reader's English level)
   other: ''                          # anything else agreed (sentence summaries, quiz answers, terminology)
 

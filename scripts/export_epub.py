@@ -26,6 +26,11 @@ BOOK = None  # set in main()
 ROOT = DATA = OUT = BOOK_ID = None
 NOTE = "解读"  # label of the subject notes, e.g. 经济学解读
 SUBJECT = ""
+PAPER = False  # book.kind == "paper": one chapter, no chapter numbers
+
+
+def chap_name(ch):
+    return ch["title_zh"] if PAPER else f'第{ch["number"]}章　{ch["title_zh"]}'
 
 
 def load_js(path, var):
@@ -250,12 +255,12 @@ class Chapter:
     def render(self):
         ch = self.ch
         body = (f'<section epub:type="chapter" class="chapter"><header class="chap-head">'
-                f'<p class="eyebrow">Chapter {ch["number"]}</p><h1>{esc(ch["title"])}<br/>'
-                f'<span class="zh">第{ch["number"]}章　{esc(ch["title_zh"])}</span></h1>'
+                + ("" if PAPER else f'<p class="eyebrow">Chapter {ch["number"]}</p>')
+                + f'<h1>{esc(ch["title"])}<br/><span class="zh">{esc(chap_name(ch))}</span></h1>'
                 + (f'<p class="stats">原书 p.{ch["pages"][0]}–{ch["pages"][1]}</p>' if ch["pages"][0] is not None else "")
                 + '</header>')
         if ch.get("guide"):
-            body += '<div class="guide"><p class="guide-title">本章导读</p>' + "".join(f"<p>{md(p)}</p>" for p in ch["guide"]) + "</div>"
+            body += f'<div class="guide"><p class="guide-title">{"导读" if PAPER else "本章导读"}</p>' + "".join(f"<p>{md(p)}</p>" for p in ch["guide"]) + "</div>"
         body += "".join(self.block(b) for b in ch["blocks"])
         body += self.end()
         if ch.get("appendix"):
@@ -263,7 +268,7 @@ class Chapter:
             body += "".join(f'<div class="guide"><p>{md(p)}</p></div>' for p in ch.get("appendix_guide") or [])
             body += "".join(self.block(b) for b in ch["appendix"])
         body += "</section>"
-        return page(f'第{ch["number"]}章 {ch["title_zh"]}', body)
+        return page(chap_name(ch).replace("　", " "), body)
 
     def toc(self):
         """(title, href, children) for the navigation document."""
@@ -286,7 +291,7 @@ class Chapter:
             kids.append(("本章术语", f"{self.file}#end-gloss", []))
         if self.ch.get("appendix"):
             kids.append(("附录", f"{self.file}#appendix", []))
-        return (f'第{self.ch["number"]}章　{self.ch["title_zh"]}', self.file, kids)
+        return (chap_name(self.ch), self.file, kids)
 
 
 # ---------------------------------------------------------------- book pages
@@ -304,13 +309,13 @@ def title_page(book, chapters):
 <p class="eyebrow">{esc(BOOK.cfg["book"]["author"])}</p>
 <h1>{esc(book["title"])}<br/><span class="zh">{esc(book["title_zh"])}</span></h1>
 <p class="subtitle">双语精读本 · 原文 / 译文 / {esc(SUBJECT)}{NOTE}</p>
-<p class="stats">{len(chapters)} 章 · {n_sent:,} 句</p>
+<p class="stats">{"" if PAPER else f"{len(chapters)} 章 · "}{n_sent:,} 句</p>
 <div class="guide"><p class="guide-title">阅读说明</p>
 <p>每句英文原文下面紧跟中文译文。重要的地方附有说明：</p>
-<p>{tag(NOTE, "econ")}{esc(SUBJECT)}{NOTE}：概念、逻辑、图表读法，以及与其他章节的联系。</p>
+<p>{tag(NOTE, "econ")}{esc(SUBJECT)}{NOTE}：{"问题与贡献、方法原理、实验读法，以及背景与后续影响。" if PAPER else "概念、逻辑、图表读法，以及与其他章节的联系。"}</p>
 <p>{tag("语言", "lang")}语言提示：只在遇到值得注意的词汇或语法时出现。</p>
 <p>{tag("要点", "sum")}段落要点：用一句话概括这一段讲了什么。</p>
-<p>图表放在正文第一次提到它们的地方。每章末尾依次是章末测验（答案与解析集中在题目后面）、本章小结和本章术语；全书最后有术语索引。</p></div>
+<p>{"图表放在正文第一次提到它们的地方。" if PAPER else "图表放在正文第一次提到它们的地方。每章末尾依次是章末测验（答案与解析集中在题目后面）、本章小结和本章术语；全书最后有术语索引。"}</p></div>
 <p class="legal">{xhtml(BOOK.cfg["book"]["source_note"])}</p>
 </section>"""
     return page("双语精读本", body)
@@ -473,7 +478,7 @@ def ncx_doc(entries, title):
 
 
 def main():
-    global BOOK, ROOT, DATA, OUT, BOOK_ID, NOTE, SUBJECT
+    global BOOK, ROOT, DATA, OUT, BOOK_ID, NOTE, SUBJECT, PAPER
     sys.stdout.reconfigure(encoding="utf-8")
     BOOK, _ = open_book(sys.argv[1:])
     b = BOOK.cfg["book"]
@@ -482,6 +487,7 @@ def main():
     # a stable identifier, so a reading app treats a re-export as the same book
     BOOK_ID = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, b.get("epub_id") or f'readpdf/{b["epub_name"]}'))
     NOTE, SUBJECT = BOOK.cfg["notes"]["label"], b["subject"]
+    PAPER = b.get("kind") == "paper"
     book = load_js(DATA / "book.js", "BOOK_INDEX")
     img = Images()
     chapters = [Chapter(load_js(DATA / f'{c["id"]}.js', "BOOK_DATA["), img) for c in book["chapters"] if c["available"]]

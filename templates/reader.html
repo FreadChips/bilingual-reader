@@ -450,6 +450,8 @@ body.zh-hide .math .m-zh { display: none; }
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const md = s => esc(s || "").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   const NOTE_LABEL = BOOK.note_label || "解读";
+  const PAPER = BOOK.kind === "paper";  // a paper is one "chapter": no chapter numbers
+  const chapName = ch => PAPER ? ch.title_zh : `第${ch.number}章　${ch.title_zh}`;
   document.title = `${BOOK.title_zh || BOOK.title} · 双语精读`;
   $("#brandTitle").textContent = `${BOOK.title_zh || BOOK.title} · 双语精读`;
   $("#brandSub").textContent = BOOK.title || "";
@@ -652,7 +654,7 @@ body.zh-hide .math .m-zh { display: none; }
   }
 
   function navHTML(ch) {
-    let h = `<h5>本章</h5><a href="#top">导读</a>`;
+    let h = `<h5>${PAPER ? "目录" : "本章"}</h5><a href="#top">导读</a>`;
     for (const b of ch.blocks) {
       if (b.type !== "heading") continue;
       const m = b.text.match(/^Principle (\d+):/);
@@ -669,8 +671,8 @@ body.zh-hide .math .m-zh { display: none; }
         ? `<a class="l1" href="#${b.id}" data-target="${b.id}">附录：${esc(b.zh)}</a>`
         : `<a class="l2" href="#${b.id}" data-target="${b.id}">${esc(b.zh)}</a>`;
     }
-    h += `<h5>全书章节</h5>`;
-    for (const c of BOOK.chapters) {
+    if (!PAPER || BOOK.chapters.length > 1) h += `<h5>全书章节</h5>`;
+    for (const c of (PAPER && BOOK.chapters.length === 1 ? [] : BOOK.chapters)) {
       const cls = c.id === ch.id ? "current" : (c.available ? "" : "off");
       h += c.available
         ? `<a class="chap ${cls}" href="#${c.id}" data-chapter="${c.id}"><span class="n">${c.number}</span><span>${esc(c.title_zh)}</span></a>`
@@ -687,8 +689,8 @@ body.zh-hide .math .m-zh { display: none; }
     if (!ch) { content.innerHTML = `<div class="empty">这一章还没有生成。</div>`; return; }
     current = ch;
     store.set("chapter", cid);
-    document.title = `第${ch.number}章 ${ch.title_zh} · 双语精读`;
-    $("#brandTitle").textContent = `第${ch.number}章　${ch.title_zh}`;
+    document.title = `${chapName(ch)} · 双语精读`;
+    $("#brandTitle").textContent = chapName(ch);
     $("#brandSub").textContent = ch.title;
     const appendix = ch.appendix || [];
     const paras = iterParas(ch.blocks.concat(appendix));
@@ -700,7 +702,7 @@ body.zh-hide .math .m-zh { display: none; }
       <div class="zh-title">${esc(ch.title_zh)}</div>
       <div class="stats">${ch.pages[0] != null ? `<span>原书 p.${ch.pages[0]}–${ch.pages[1]}</span>` : ""}<span>${paras.length} 段 · ${nSent} 句</span><span>${ch.glossary.length} 个术语</span>${nFig ? `<span>${nFig} 个图表</span>` : ""}${appendix.length ? `<span>含附录</span>` : ""}</div>
       <button class="resume" id="resume"></button></div>`;
-    if (ch.guide && ch.guide.length) h += `<div class="guide"><h3>本章导读</h3>${ch.guide.map(p => `<p>${md(p)}</p>`).join("")}</div>`;
+    if (ch.guide && ch.guide.length) h += `<div class="guide"><h3>${PAPER ? "导读" : "本章导读"}</h3>${ch.guide.map(p => `<p>${md(p)}</p>`).join("")}</div>`;
     h += ch.blocks.map(b => blockHTML(ch, b)).join("");
     h += endHTML(ch);
     if (appendix.length) {
