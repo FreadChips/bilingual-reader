@@ -38,3 +38,12 @@ python -m venv .venv
 ## 版权
 
 书籍通常有版权。生成的阅读器、EPUB 和提取出的原文都只留在本地，不要公开发布。
+
+## 已知问题（2026-10-29）
+
+- 回归测试书放在一个旧会话的临时目录里（`%LOCALAPPDATA%\Temp\claude\D--Projects-ReadPDF\8c38353a-…\scratchpad\` 下的 auto、os、ax），可能被清理，应该挪到固定位置。
+- auto 测试书（曼昆微观 PDF，自动引擎）和 10 月 27 日的快照相比有未审查的差异：句子召回 98.4%，标题 425/436，第 2 章少一张图。其中一部分可能是退步。
+- 论文（arXiv ResNet）：行首的 “Fig. 6 (middle) shows …” 被当成图注；图题在换行处截断（“Figure 4: Training on”）。
+- 表格只能当图片（PDF），或每行一个字符串（EPUB），没有单元格结构。
+- 不支持扫描版 PDF（需要 OCR），也不支持 HTML 输入。EPUB 输入只在一本合成书上测试过。
+- 还没有 `status.py` 和自动检查门槛：注释密度目标目前要人工对照 `quality.py` 的输出。
