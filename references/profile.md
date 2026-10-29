@@ -5,6 +5,7 @@ Everything specific to one book lives here; the scripts hold no book-specific va
 ## book
 | key | meaning |
 | --- | --- |
+| `kind` | `book` (default) or `paper`: a paper is one chapter, the reader and EPUB show no chapter numbers, and its annotation standard is in annotation-paper.md |
 | `title`, `title_zh`, `author` | shown in the reader, the EPUB title page and metadata |
 | `subject` | 经济学, 心理学 …; notes are labelled `<subject><notes.label>` (经济学解读) |
 | `source_note` | HTML line under every chapter and on the EPUB title page: source and 仅供个人学习使用，请勿传播 |

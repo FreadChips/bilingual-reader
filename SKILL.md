@@ -1,6 +1,6 @@
 ---
 name: bilingual-reader
-description: Turn an English book (PDF or EPUB) into a sentence-by-sentence bilingual study edition — original sentence, Chinese translation, subject notes, figures in place — with a browser reader and a phone EPUB. Use when the user wants a book made into a 双语精读本 / 逐句对照 / 中英对照学习版, wants the next chapter of such a book, or wants to fix, check or export one.
+description: Turn an English book or research paper (PDF or EPUB) into a sentence-by-sentence bilingual study edition — original sentence, Chinese translation, subject notes, figures in place — with a browser reader and a phone EPUB. Use when the user wants a book made into a 双语精读本 / 逐句对照 / 中英对照学习版, wants the next chapter of such a book, or wants to fix, check or export one.
 ---
 
 # Bilingual study edition of a book
@@ -43,7 +43,10 @@ Below, `K` is this skill's `scripts` folder.
 ## 1. Set up the book folder
 ```
 python -I K/new_book.py BOOKDIR path/to/book.(pdf|epub) --subject 经济学
+python -I K/new_book.py PAPERDIR path/to/paper.pdf --kind paper --subject 深度学习
 ```
+A **paper** (`book.kind: paper`) is one chapter and one round; read `references/annotation-paper.md`
+before annotating it (its own standard, footnotes, citations, set-up steps).
 Creates the layout (book.yaml, NOTES.md, labels/, patches/, annotations/, build/, reader/, export/),
 copies the reader page, guesses the chapter pattern from the TOC and prints which entries it matched. Prefer an
 EPUB source whenever one exists, since its structure is already marked up. A scanned PDF (no text
@@ -142,5 +145,6 @@ Send to Kindle) and to keep it private.
 - `references/profile.md` — book.yaml schema: book fields, PDF rule-engine layout rules, EPUB mapping
 - `references/example-mankiw.yaml` — full profile of a complex textbook PDF (Mankiw, Principles 8e)
 - `references/annotation-guide.md` — annotation file format, writing standard, checks
+- `references/annotation-paper.md` — what differs for a research paper (`book.kind: paper`)
 - `references/patches.md` — hand-patch operations
 - `references/lessons.md` — what went wrong on the first book and how it was fixed

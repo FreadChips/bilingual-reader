@@ -103,7 +103,11 @@ The agent looks at the region map, and records each structural decision as a han
      text inside a table is its header row.
    - Sections named in `auto.skip_sections` (References, Bibliography …) are dropped.
 
-   A PDF without an outline (an article, a paper) is one chapter.
+   A PDF without an outline (an article, a paper) is one chapter, and so is any `book.kind: paper`.
+   In a paper the first page's title (set large) and the author block before the abstract (or the
+   first heading) are dropped.
+   - A label followed by a panel in brackets and a lower-case word ("Fig. 6 (middle) shows …",
+     "Figure 8.8 (a) presents …") is a sentence, not a label.
 4. **Reading order.** XY-cut over the main-column units: split at a column gutter first, then at a
    horizontal gap, recursively. Margin regions stay aside. Margin text that opens in bold becomes a
    glossary entry, attached to the paragraph that bolds the term; other margin text becomes a side note.
@@ -170,6 +174,7 @@ refinement. A label naming a region that does not exist stops the extraction.
 | `skip_sections` | References, Bibliography, Works Cited, Notes, Index | headings whose section is dropped |
 | `box_headings` | [] | regexes for feature headings that open a box (`['LINK IT UP', 'CLEAR IT UP', 'WORK IT OUT']`) |
 | `uncaptioned_pictures` | skip | skip / keep |
+| `caption_position` | nearest | nearest / below / above: a label outside a panel takes the picture above it (`below`: the caption sits under its figure, as in papers) or under it, falling back to the nearest |
 | `furniture_share` | 0.3 | share of pages a repeated top/bottom text must reach to be dropped |
 | `margin_overlap` | 0.3 | a region overlapping the main column by less than this share is margin |
 | `box_label_max` | 40 | longest first line taken as a box label |
@@ -205,7 +210,8 @@ Two more layouts, with no reference to score against, were checked by reading th
   - 282 of the 285 feature boxes came out right, including WORK IT OUT panels that spill over pages.
   - 0.3% of the 16,644 sentences start in lower case. Most of them are the end-of-chapter Key Terms
     lists (bold term + definition, no full stop), which run together.
-- **arXiv 1512.03385** (ResNet; 12 pages, two columns, no outline, 4 s).
+- **arXiv 1512.03385** (ResNet; 12 pages, two columns, no outline, 4 s). Made into a full study
+  edition on 2026-10-29 (D:/Projects/papers/resnet): 2 labels, 14 patches, 377 sentences.
   - Reading order across columns is right, and sentences continue from column to column.
   - All 21 figures and tables were found with captions.
   - Heading levels came from type size.
@@ -258,8 +264,10 @@ What it still gets wrong, so check for these:
 - labels set beside the text they belong to: "CASE STUDY" now stands as its own paragraph, but when
   the model puts the "STUDY" line inside the paragraph's region it lands mid-sentence ("being private
   STUDY goods");
-- an in-text figure reference at the start of a line ("Fig. 6 (middle) shows …") read as a figure label
-  (arXiv ResNet);
+- a table the model reads as text (ResNet Table 10): label its region `{role: picture}`;
+- in a short document, line-end hyphens in compounds are joined ("highlevel"): the vocabulary is too
+  small to tell compounds from split words, so patch them;
+- footnotes are dropped: in a paper, give their content in the note on the sentence with the marker;
 - end-of-chapter quizzes, which become headings and paragraphs, not a quiz;
 - equations stored as digits, when `symbol_fonts` is not set;
 - cartoon captions with no detected picture, which become side notes;
