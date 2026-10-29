@@ -45,6 +45,8 @@ def main():
         sys.exit(__doc__)
     mode = args[0]
     testbed = Path(testbed)
+    if not testbed.exists():
+        sys.exit(f"no {testbed}: copy testbed.example.yaml to testbed.yaml and list your own books there")
     books = yaml.safe_load(testbed.read_text(encoding="utf-8"))["books"]
     if only:
         books = [b for b in books if b["name"] in only]

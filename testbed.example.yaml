@@ -1,0 +1,9 @@
+# Books that regress_all.py re-extracts after any toolkit change (SKILL.md step 4).
+# Copy this file to testbed.yaml (which git ignores) and list the book folders on your machine.
+# Put the annotated books first: their annotations are keyed by paragraph ids, so any change there
+# needs review. Add test books with other layouts (no annotations needed) to catch regressions early.
+# Paths are absolute, or relative to this file.
+books:
+  - {name: mybook, dir: '/path/to/my-book'}          # a book with annotated chapters
+  - {name: mypaper, dir: '/path/to/papers/my-paper'}  # a paper (kind: paper)
+  - {name: myfiling, dir: '/path/to/filings/my-10k'}  # a filing (kind: filing, HTML source)

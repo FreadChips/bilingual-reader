@@ -223,7 +223,7 @@ Two more layouts, with no reference to score against, were checked by reading th
   - 0.3% of the 16,644 sentences start in lower case. Most of them are the end-of-chapter Key Terms
     lists (bold term + definition, no full stop), which run together.
 - **arXiv 1512.03385** (ResNet; 12 pages, two columns, no outline, 4 s). Made into a full study
-  edition on 2026-10-29 (D:/Projects/papers/resnet): 2 labels, 14 patches, 377 sentences.
+  edition on 2026-10-29: 2 labels, 14 patches, 377 sentences.
   - Reading order across columns is right, and sentences continue from column to column.
   - All 21 figures and tables were found with captions.
   - Heading levels came from type size.

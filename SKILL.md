@@ -15,11 +15,13 @@ book folder, nothing in an agent's private memory. The folder is its own git rep
 README.md): commit toolkit changes there.
 
 Run every script with the book folder as working directory (or pass `--book DIR`) and with
-`python -I`. Python 3.10+ needs PyMuPDF 2.x with its layout model, and PyYAML. If the project has no
-environment, create one with `python -m venv .venv`, then run
-`.venv/Scripts/pip install -r <this folder>/requirements.txt` (about 100 MB with onnxruntime;
-installing downloads packages, so ask the user first). `python -I -c "import pymupdf.layout"` checks it.
-Tested with pymupdf 2.0 / pymupdf-layout 2.0 on Windows.
+`python -I`. Python 3.10+ needs PyMuPDF 2.x with its layout model, and PyYAML.
+**Which Python:** the install script (README.md) creates `.venv` in this skill folder; use it:
+`<this folder>/.venv/Scripts/python.exe` on Windows, `<this folder>/.venv/bin/python` elsewhere.
+If it is missing, use the book folder's `.venv` if there is one, or create one with
+`python -m venv .venv` and `pip install -r <this folder>/requirements.txt` (about 100 MB with
+onnxruntime; installing downloads packages, so ask the user first).
+`python -I -c "import pymupdf.layout"` checks it. Tested with pymupdf 2.0 / pymupdf-layout 2.0 on Windows.
 Below, `K` is this skill's `scripts` folder.
 
 ## Ground rules
