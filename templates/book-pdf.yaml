@@ -1,0 +1,35 @@
+# Book profile for the bilingual-reader toolkit (schema: references/profile.md).
+# PDF books use the automatic engine: a layout model finds headings, paragraphs, margin notes,
+# figures and boxes; corrections go into labels/chNN.yaml (references/auto-layout.md).
+
+book:
+  title: {{title}}
+  title_zh: ''                       # 中文书名
+  author: {{author}}
+  subject: {{subject}}               # notes are labelled "<subject>解读"
+  source_note: ''                    # shown under every chapter, e.g. 原文摘自 …，仅供个人学习使用，请勿传播。
+  epub_name: {{slug}}-bilingual
+
+source:
+  type: pdf
+  engine: auto
+  file: {{file}}
+
+chapters:
+  outline_pattern: {{pattern}}       # matched against PDF outline entries: group 1 = number, group 2 = title
+  titles_zh: {}
+
+layout: {}
+  # symbol_fonts: []                 # fonts listed in font_profile.txt under "math symbols stored as digits?"
+  # symbol_map: {"5": "=", "3": "×", "2": "−", "1": "+", ",": "<", ".": ">"}
+  # page_offset: 0                   # only when the PDF has no page labels: PDF index − printed page number
+
+auto: {}
+  # rules:                           # region rules for fixes that recur across chapters; first match wins
+  #   - {role: skip, text_starts: "To find additional study resources"}
+  #   - {role: heading, level: 2, cls: text, font_has: Bold, lines_max: 1}
+  # figure_label: '^(Figure|Table|Exhibit)\s*([A-Z]?[-.]?\d+(?:[.\-–]\d+)*)'
+  # box_headings: ['LINK IT UP', 'CLEAR IT UP']   # feature headings that open a box (to the next full-width rule)
+  # skip_sections: [References, Bibliography, Index]
+  # footnotes: skip                  # or body
+  # uncaptioned_pictures: skip       # or keep

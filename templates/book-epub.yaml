@@ -1,0 +1,24 @@
+# Book profile for the bilingual-reader toolkit (schema: references/profile.md).
+
+book:
+  title: {{title}}
+  title_zh: ''                       # 中文书名，例如 思考，快与慢
+  author: {{author}}
+  subject: {{subject}}               # notes are labelled "<subject>解读"
+  source_note: ''                    # shown under every chapter, e.g. 原文摘自 …，仅供个人学习使用，请勿传播。
+  epub_name: {{slug}}-bilingual
+
+source:
+  type: epub
+  file: {{file}}
+
+chapters:
+  toc_pattern: {{pattern}}           # matched against TOC labels: group 1 = chapter number, group 2 = title
+  titles_zh: {}                      # optional; each chapter's meta.json title_zh takes precedence
+
+epub:                                # every key is optional; these are the defaults
+  heading_map: {h1: title, h2: 1, h3: 2, h4: 2, h5: 2, h6: 2}
+  box_tags: [aside]
+  box_classes: [sidebar, box, boxed, feature, callout, note-box]
+  skip_classes: [pagebreak, page-break, footnote, footnotes, endnote, endnotes, toc]
+  figure_label_pattern: '^(Figure|Fig\.|Table|Exhibit)\s*([A-Z]?[\d.\-]+)[.:]?\s*'

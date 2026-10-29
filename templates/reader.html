@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>双语精读</title>
+<style>
+:root {
+  --bg: #f6f3ec;
+  --surface: #fffdf9;
+  --surface-2: #f1ede4;
+  --text: #1d2125;
+  --text-2: #4f5660;
+  --text-3: #8b9099;
+  --border: #e3ddd0;
+  --border-strong: #cfc6b4;
+  --accent: #1f6e74;
+  --accent-soft: #e5f1f1;
+  --accent-text: #175a5f;
+  --lang: #a5690d;
+  --lang-soft: #fbf2e1;
+  --term-mark: #fff1c7;
+  --box-fyi: #eef3f8;
+  --box-fyi-border: #c9d7e6;
+  --box-case: #f5efe6;
+  --box-case-border: #e1d2bb;
+  --good: #2e7d4f;
+  --good-soft: #e3f3e8;
+  --bad: #b3412e;
+  --bad-soft: #f8e5e1;
+  --shadow: 0 1px 2px rgba(40, 32, 20, .05), 0 2px 8px rgba(40, 32, 20, .04);
+  --serif: "Source Serif 4", "Source Serif Pro", Georgia, Cambria, "Times New Roman", serif;
+  --sans: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+  --fs: 17px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141619; --surface: #1c1f23; --surface-2: #23272c; --text: #e7e5e0; --text-2: #b4b2ac;
+    --text-3: #7d7f84; --border: #2e3237; --border-strong: #3d4248; --accent: #5bb3b8;
+    --accent-soft: #1d3133; --accent-text: #8fd0d4; --lang: #e0a650; --lang-soft: #33291a;
+    --term-mark: #4a3f1d; --box-fyi: #1b2530; --box-fyi-border: #2d3d4f; --box-case: #2a241c;
+    --box-case-border: #463b2c; --good: #6fcf97; --good-soft: #1c3326; --bad: #f08c78; --bad-soft: #3a211c;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141619; --surface: #1c1f23; --surface-2: #23272c; --text: #e7e5e0; --text-2: #b4b2ac;
+  --text-3: #7d7f84; --border: #2e3237; --border-strong: #3d4248; --accent: #5bb3b8;
+  --accent-soft: #1d3133; --accent-text: #8fd0d4; --lang: #e0a650; --lang-soft: #33291a;
+  --term-mark: #4a3f1d; --box-fyi: #1b2530; --box-fyi-border: #2d3d4f; --box-case: #2a241c;
+  --box-case-border: #463b2c; --good: #6fcf97; --good-soft: #1c3326; --bad: #f08c78; --bad-soft: #3a211c;
+  --shadow: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+  font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+a { color: var(--accent-text); }
+
+/* ---------- top bar */
+.topbar {
+  position: sticky; top: 0; z-index: 20; height: 56px; display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--border);
+}
+.progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: var(--accent); transition: width .1s; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; min-width: 34px;
+  padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  cursor: pointer; font-size: 13px; color: var(--text-2);
+}
+.icon-btn:hover { border-color: var(--border-strong); color: var(--text); }
+.icon-btn svg { width: 16px; height: 16px; }
+.brand { min-width: 0; flex: 1; display: flex; flex-direction: column; line-height: 1.25; }
+.brand b { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand span { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 2px; }
+.seg button {
+  border: 0; background: transparent; height: 28px; padding: 0 10px; border-radius: 6px; cursor: pointer;
+  font-size: 13px; color: var(--text-2); white-space: nowrap;
+}
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.seg-label { font-size: 12px; color: var(--text-3); margin-right: 2px; }
+.settings-wrap { position: relative; }
+.panel {
+  position: absolute; right: 0; top: 42px; width: 260px; padding: 14px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.14); display: none;
+}
+.panel.open { display: block; }
+.panel h4 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: .04em; }
+.panel .row-set { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; font-size: 14px; }
+.panel .row-set + .row-set { border-top: 1px dashed var(--border); }
+.switch { position: relative; width: 38px; height: 22px; border-radius: 11px; border: 0; background: var(--border-strong); cursor: pointer; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.switch[aria-pressed="true"] { background: var(--accent); }
+.switch[aria-pressed="true"]::after { left: 19px; }
+.panel .seg button { padding: 0 8px; }
+.panel .hint { margin-top: 10px; font-size: 12px; color: var(--text-3); line-height: 1.6; }
+kbd { font: 11px/1 var(--sans); padding: 2px 5px; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--surface-2); }
+
+/* ---------- layout */
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1440px; margin: 0 auto; }
+.nav {
+  position: fixed; inset: 56px auto 0 0; width: 284px; z-index: 15; overflow-y: auto; padding: 18px 14px 40px;
+  background: var(--bg); border-right: 1px solid var(--border); transform: translateX(-100%); transition: transform .2s;
+}
+.nav.open { transform: none; box-shadow: 8px 0 30px rgba(0,0,0,.12); }
+.scrim { position: fixed; inset: 56px 0 0; background: rgba(0,0,0,.25); z-index: 14; display: none; }
+.scrim.open { display: block; }
+@media (min-width: 1180px) {
+  .layout { grid-template-columns: 270px minmax(0, 1fr); }
+  .nav { position: sticky; top: 56px; width: auto; height: calc(100vh - 56px); transform: none; box-shadow: none !important; background: transparent; }
+  .scrim, #navBtn { display: none !important; }
+}
+.nav h5 { margin: 18px 6px 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--text-3); text-transform: uppercase; }
+.nav h5:first-child { margin-top: 0; }
+.nav a {
+  display: block; padding: 5px 8px; border-radius: 6px; text-decoration: none; color: var(--text-2);
+  font-size: 13px; line-height: 1.45;
+}
+.nav a:hover { background: var(--surface-2); color: var(--text); }
+.nav a.l1 { font-weight: 600; color: var(--text); margin-top: 6px; }
+.nav a.l2 { padding-left: 18px; }
+.nav a.active { background: var(--accent-soft); color: var(--accent-text); }
+.nav .chap { display: flex; gap: 8px; align-items: baseline; }
+.nav .chap .n { width: 20px; flex: none; color: var(--text-3); font-variant-numeric: tabular-nums; font-size: 12px; text-align: right; }
+.nav .chap.off { color: var(--text-3); opacity: .65; cursor: default; }
+.nav .chap.off:hover { background: transparent; }
+.nav .chap.current { background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
+
+main { min-width: 0; padding: 28px 16px 120px; }
+.content { max-width: 1040px; margin: 0 auto; }
+
+/* ---------- chapter header */
+.chapter-head { max-width: 720px; margin: 8px 0 28px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .14em; color: var(--accent-text); text-transform: uppercase; }
+.chapter-head h1 { margin: 8px 0 4px; font: 600 34px/1.2 var(--serif); letter-spacing: -.01em; text-wrap: balance; }
+.chapter-head .zh-title { font-size: 20px; color: var(--text-2); }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px; font-size: 13px; color: var(--text-3); }
+.resume {
+  display: none; margin-top: 16px; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px;
+  border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent-text); cursor: pointer; font-size: 13px;
+}
+.resume.show { display: inline-flex; }
+
+.guide { max-width: 720px; padding: 18px 20px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 36px; }
+.guide h3 { margin: 0 0 8px; font-size: 14px; color: var(--accent-text); }
+.guide p { margin: 6px 0; color: var(--text-2); }
+.guide strong { color: var(--text); }
+
+/* ---------- headings */
+.h1 { max-width: 720px; margin: 56px 0 18px; padding-top: 6px; border-top: 2px solid var(--text); }
+.h1 .num { font: 600 13px/1 var(--sans); color: var(--text-3); letter-spacing: .06em; }
+.h1 h2 { margin: 8px 0 2px; font: 600 26px/1.25 var(--serif); }
+.h1 .zh { font-size: 17px; color: var(--text-2); }
+.h2 { max-width: 720px; margin: 40px 0 14px; display: flex; gap: 12px; align-items: flex-start; }
+.h2 .badge {
+  flex: none; margin-top: 3px; min-width: 44px; height: 24px; padding: 0 8px; border-radius: 6px; background: var(--accent);
+  color: #fff; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;
+}
+.h2 h3 { margin: 0; font: 600 20px/1.35 var(--serif); }
+.h2 .zh { font-size: 15px; color: var(--text-2); margin-top: 2px; }
+
+/* ---------- paragraphs */
+.row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px 28px; margin-bottom: 18px; }
+@media (min-width: 1480px) {
+  .row { grid-template-columns: minmax(0, 720px) 260px; }
+  .row > .side { position: relative; }
+  .row > .side .side-inner { position: sticky; top: 76px; }
+}
+@media (max-width: 1479px) { .row { max-width: 720px; } }
+.para {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 6px 0 4px;
+  box-shadow: var(--shadow);
+}
+.para-meta { display: flex; justify-content: space-between; padding: 8px 20px 0; font-size: 11px; color: var(--text-3); letter-spacing: .04em; }
+.para-meta a { color: inherit; text-decoration: none; }
+.para-meta a:hover { color: var(--accent-text); }
+.sent { padding: 10px 20px 10px 17px; border-left: 3px solid transparent; transition: background .15s; }
+.sent:hover { background: color-mix(in srgb, var(--surface-2) 55%, transparent); }
+.sent.focus { border-left-color: var(--accent); background: var(--accent-soft); }
+.en { font: 400 var(--fs)/1.65 var(--serif); color: var(--text); }
+.en b { font-weight: 600; background: var(--term-mark); padding: 0 2px; border-radius: 3px; }
+.zh {
+  margin-top: 4px; font-size: calc(var(--fs) - 1.5px); line-height: 1.75; color: var(--text-2);
+  transition: filter .2s, opacity .2s;
+}
+.zh strong { color: var(--text); font-weight: 600; }
+body.zh-cover .zh { filter: blur(5px); opacity: .55; cursor: pointer; user-select: none; }
+body.zh-cover .sent.revealed .zh, body.zh-cover .zh.revealed { filter: none; opacity: 1; cursor: auto; user-select: auto; }
+body.zh-hide .zh { display: none; }
+.note {
+  margin-top: 8px; padding: 9px 12px; border-radius: 8px; font-size: calc(var(--fs) - 2.5px); line-height: 1.7;
+  display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline;
+}
+.note .tag { font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+.note.econ { background: var(--accent-soft); color: var(--text); }
+.note.econ .tag { background: var(--accent); color: #fff; }
+.note.econ strong { color: var(--accent-text); }
+.note.lang { background: var(--lang-soft); color: var(--text-2); }
+.note.lang .tag { background: transparent; color: var(--lang); border: 1px solid currentColor; }
+body.no-econ .note.econ, body.no-lang .note.lang, body.no-sum .sum { display: none; }
+.sum {
+  margin: 6px 20px 12px; padding-top: 10px; border-top: 1px dashed var(--border-strong);
+  font-size: 14px; color: var(--text-2); display: flex; gap: 10px; align-items: baseline;
+}
+.sum .tag { flex: none; font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--accent-text); }
+.para.quote .en { font-style: italic; }
+.para.quote { border-left: 4px solid var(--border-strong); }
+.para.bullets .sent { position: relative; padding-left: 38px; }
+.para.bullets .sent::before { content: ""; position: absolute; left: 22px; top: 22px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* ---------- side material */
+.side { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.side-inner { display: flex; flex-direction: column; gap: 12px; }
+.term {
+  padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border);
+  border-top: 3px solid var(--accent); font-size: 13px; box-shadow: var(--shadow);
+}
+.term .t-en { font: 600 16px/1.3 var(--serif); }
+.term .t-zh { font-weight: 600; color: var(--accent-text); margin-left: 6px; font-size: 14px; }
+.term .t-def { margin-top: 6px; color: var(--text-2); font-family: var(--serif); font-size: 14px; line-height: 1.5; }
+.term .t-def-zh { margin-top: 2px; color: var(--text); }
+.term .t-label { font-size: 10px; letter-spacing: .1em; font-weight: 700; color: var(--text-3); margin-bottom: 4px; }
+figure.photo { margin: 0; padding: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+figure.photo img { display: block; width: 100%; height: auto; border-radius: 6px; max-height: 340px; object-fit: contain; background: #fff; }
+figure.photo figcaption { margin-top: 8px; font-size: 13px; line-height: 1.55; }
+figure.photo .c-en { font-family: var(--serif); font-style: italic; color: var(--text); }
+figure.photo .c-zh { color: var(--text-2); margin-top: 2px; }
+figure.photo .c-n { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); color: var(--text-2); font-size: 12.5px; }
+@media (max-width: 1479px) {
+  .side { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .side:empty { display: none; }
+  figure.photo img { max-height: 260px; }
+}
+
+/* ---------- boxes */
+.box { max-width: 720px; margin: 34px 0; border-radius: 16px; padding: 18px 14px 6px; border: 1px solid var(--box-fyi-border); background: var(--box-fyi); }
+.box.case { background: var(--box-case); border-color: var(--box-case-border); }
+.box-head { padding: 0 6px 14px; }
+.box-label { display: inline-flex; gap: 6px; align-items: center; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-2); }
+.box-label i { font-style: normal; font-weight: 600; letter-spacing: .02em; text-transform: none; color: var(--text-3); }
+.box-title { margin-top: 6px; font: 600 21px/1.3 var(--serif); }
+.box-title-zh { color: var(--text-2); font-size: 15px; }
+.box .row { max-width: none; grid-template-columns: minmax(0, 1fr); }
+.box .side { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 260px)); }
+.box .side-inner { position: static !important; }
+
+/* ---------- quick quiz */
+.quiz-card { max-width: 720px; margin: 28px 0; padding: 16px 20px; border-radius: 14px; border: 1.5px dashed var(--accent); background: var(--surface); }
+.quiz-card .q-title { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--accent-text); font-size: 14px; }
+.quiz-card ol { margin: 10px 0 0; padding-left: 22px; }
+.quiz-card li { margin: 10px 0; }
+.quiz-card li::marker { color: var(--text-3); font-weight: 600; }
+.q-en { font-family: var(--serif); font-size: calc(var(--fs) - 1px); }
+.q-zh { color: var(--text-2); font-size: 14px; }
+details.hint { margin-top: 6px; }
+details.hint summary { cursor: pointer; font-size: 13px; color: var(--accent-text); width: max-content; }
+details.hint div { margin-top: 6px; padding: 9px 12px; border-radius: 8px; background: var(--accent-soft); font-size: 14px; }
+
+/* ---------- table */
+.table-card { max-width: 720px; margin: 30px 0; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.table-card .tc-head { padding: 14px 18px 10px; }
+.table-card .tc-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--accent-text); }
+.table-card .tc-title { font: 600 19px/1.3 var(--serif); margin-top: 2px; }
+.table-card .tc-title span { font: 15px var(--sans); color: var(--text-2); margin-left: 8px; }
+.principles { width: 100%; border-collapse: collapse; font-size: 14px; }
+.principles th { text-align: left; padding: 9px 18px; background: var(--surface-2); font-size: 12px; letter-spacing: .03em; color: var(--text-2); border-top: 1px solid var(--border); }
+.principles td { padding: 8px 18px; border-top: 1px solid var(--border); vertical-align: top; }
+.principles td.k { width: 44px; color: var(--accent-text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.principles .p-en { font-family: var(--serif); }
+.principles .p-zh { color: var(--text-2); font-size: 13.5px; }
+.table-card .tc-note { padding: 12px 18px; border-top: 1px solid var(--border); color: var(--text-2); font-size: 14px; }
+.table-card details { border-top: 1px solid var(--border); padding: 10px 18px; }
+.table-card details summary { cursor: pointer; font-size: 13px; color: var(--text-3); }
+.table-card details img { width: 100%; margin-top: 10px; border-radius: 6px; background: #fff; }
+
+/* ---------- figures */
+.fig-card { max-width: 720px; margin: 26px 0; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.fig-card .tc-head { padding: 14px 18px 10px; }
+.fig-card .tc-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--accent-text); }
+.fig-card .tc-title { font: 600 18px/1.35 var(--serif); margin-top: 2px; }
+.fig-card .tc-title span { font: 14.5px var(--sans); color: var(--text-2); margin-left: 8px; }
+.fig-card .fig-img { display: block; width: 100%; height: auto; background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+:root[data-theme="dark"] .fig-card .fig-img { filter: brightness(.92); }
+.fig-card .cap { padding: 12px 18px 4px; }
+.fig-card .cap .c-en { font-family: var(--serif); font-size: 14.5px; line-height: 1.6; color: var(--text); }
+.fig-card .cap .c-zh { margin-top: 4px; font-size: 14px; line-height: 1.7; color: var(--text-2); }
+.fig-card .tc-note { margin: 10px 18px 14px; padding: 9px 12px; border-radius: 8px; background: var(--accent-soft); font-size: 14px; line-height: 1.7; display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; }
+.fig-card .tc-note .tag { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--accent); color: #fff; }
+body.no-econ .fig-card .tc-note { display: none; }
+.fig-card .src { padding: 0 18px 12px; font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
+.rows { list-style: none; margin: 0; padding: 0; counter-reset: row; }
+.rows li { counter-increment: row; display: grid; grid-template-columns: 30px 1fr; gap: 4px; padding: 9px 18px; border-top: 1px solid var(--border); }
+.rows li::before { content: counter(row); color: var(--accent-text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.rows .r-en { font-family: var(--serif); font-size: 14.5px; }
+.rows .r-zh { font-size: 13.5px; color: var(--text-2); }
+.fig-card details.orig { border-top: 1px solid var(--border); padding: 10px 18px; }
+.fig-card details.orig summary { cursor: pointer; font-size: 13px; color: var(--text-3); }
+.fig-card details.orig img { width: 100%; margin-top: 10px; border-radius: 6px; background: #fff; }
+
+/* ---------- ask the experts */
+.experts { max-width: 720px; margin: 26px 0; padding: 16px 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid #7b5ea7; box-shadow: var(--shadow); }
+.experts .x-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #7b5ea7; }
+.experts .x-label i { font-style: normal; color: var(--text-3); letter-spacing: .02em; margin-left: 6px; }
+.experts .x-title { font: 600 18px/1.3 var(--serif); margin-top: 4px; }
+.experts .x-title span { font: 14.5px var(--sans); color: var(--text-2); margin-left: 8px; }
+.experts .x-prop { margin-top: 10px; font-family: var(--serif); font-size: var(--fs); line-height: 1.6; }
+.experts .x-prop-zh { margin-top: 4px; color: var(--text-2); }
+.bar { display: flex; height: 26px; margin-top: 14px; border-radius: 6px; overflow: hidden; font-size: 12px; font-weight: 600; color: #fff; }
+.bar span { display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }
+.bar .agree { background: #2e7d4f; } .bar .uncertain { background: #9aa0a6; } .bar .disagree { background: #b3412e; }
+.experts .x-src { margin-top: 8px; font-size: 11.5px; color: var(--text-3); }
+.experts .note { margin-top: 12px; }
+
+/* ---------- equations */
+.math { max-width: 720px; margin: 4px 0 22px; padding: 16px 18px; border-radius: 12px; background: var(--surface-2); border: 1px dashed var(--border-strong); text-align: center; overflow-x: auto; }
+.math .m-en, .math .m-zh { white-space: nowrap; }
+.math .grid { white-space: normal; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 18px; text-align: left; font-size: 15px; line-height: 1.8; }
+.math .grid b { font-weight: 600; margin-right: 6px; }
+.math sub { font-size: .7em; }
+.math .m-en { font: 17px/2 var(--serif); }
+.math .m-zh { margin-top: 6px; font-size: 14.5px; line-height: 2; color: var(--text-2); }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 3px; line-height: 1.35; }
+.frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 4px 1px; }
+.frac > span:last-child { padding: 1px 4px 0; }
+body.zh-hide .math .m-zh { display: none; }
+
+/* ---------- news box extras */
+.news-intro { margin: 0 6px 12px; font-size: 14px; color: var(--text-2); font-style: italic; }
+.news-intro .zh2 { font-style: normal; display: block; margin-top: 2px; }
+.news-head { margin: 0 6px 14px; padding: 12px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+.news-head .h-en { font: 700 18px/1.3 var(--sans); }
+.news-head .h-zh { color: var(--text-2); font-size: 14.5px; }
+.news-head .by { margin-top: 4px; font-size: 12.5px; color: var(--text-3); }
+.box-src { margin: 4px 6px 12px; font-size: 11.5px; color: var(--text-3); }
+
+/* ---------- appendix */
+.appendix-head { max-width: 720px; margin: 80px 0 18px; padding: 18px 20px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+.appendix-head .eyebrow { color: var(--lang); }
+.appendix-head p { margin: 8px 0 0; color: var(--text-2); }
+.appendix-head strong { color: var(--text); }
+
+/* ---------- end matter */
+.end-section { max-width: 720px; margin-top: 64px; }
+.end-section > h2 { font: 600 24px/1.3 var(--serif); margin: 0 0 4px; padding-top: 8px; border-top: 2px solid var(--text); }
+.end-section > .sub { color: var(--text-3); font-size: 14px; margin-bottom: 18px; }
+.mcq { padding: 16px 18px; margin-bottom: 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.mcq .stem { font: 500 var(--fs)/1.55 var(--serif); }
+.mcq .stem-zh { color: var(--text-2); font-size: 14px; margin-bottom: 10px; }
+.mcq .opt {
+  display: grid; grid-template-columns: 26px 1fr; gap: 8px; width: 100%; text-align: left; padding: 9px 12px; margin-top: 6px;
+  border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer;
+}
+.mcq .opt:hover:not(:disabled) { border-color: var(--accent); }
+.mcq .opt .k { font-weight: 700; color: var(--text-3); }
+.mcq .opt .o-en { font-family: var(--serif); font-size: 15px; }
+.mcq .opt .o-zh { color: var(--text-2); font-size: 13px; }
+.mcq .opt:disabled { cursor: default; }
+.mcq .opt.right { border-color: var(--good); background: var(--good-soft); }
+.mcq .opt.right .k { color: var(--good); }
+.mcq .opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.mcq .opt.wrong .k { color: var(--bad); }
+.mcq .explain { display: none; margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: var(--accent-soft); font-size: 14px; }
+.mcq.done .explain { display: block; }
+.score { display: flex; align-items: center; gap: 12px; margin: 4px 0 18px; font-size: 14px; color: var(--text-2); }
+.score b { font-size: 20px; color: var(--text); font-variant-numeric: tabular-nums; }
+.summary-list { list-style: none; margin: 0; padding: 0; }
+.summary-list li { padding: 14px 18px; margin-bottom: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+.summary-list .s-en { font-family: var(--serif); font-size: calc(var(--fs) - .5px); line-height: 1.6; }
+.summary-list .s-zh { margin-top: 6px; color: var(--text-2); }
+.gloss { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; font-size: 14px; }
+.gloss td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+.gloss tr:first-child td { border-top: 0; }
+.gloss .g-term { font: 600 15px/1.35 var(--serif); white-space: nowrap; }
+.gloss .g-term small { display: block; font: 600 13px var(--sans); color: var(--accent-text); margin-top: 2px; }
+.gloss .g-def { font-family: var(--serif); color: var(--text-2); }
+.gloss .g-def-zh { margin-top: 2px; }
+.gloss a { font-size: 12px; white-space: nowrap; text-decoration: none; }
+@media (max-width: 600px) {
+  .gloss .g-term { white-space: normal; }
+  .gloss td:last-child { display: none; }
+  .chapter-head h1 { font-size: 28px; }
+  .sent { padding-left: 15px; padding-right: 16px; }
+  .para-meta { padding-left: 16px; padding-right: 16px; }
+  .sum { margin-left: 16px; margin-right: 16px; }
+  .seg-label { display: none; }
+  .brand span { display: none; }
+}
+@media (max-width: 420px) { .seg button { padding: 0 7px; } }
+.empty { max-width: 560px; margin: 80px auto; text-align: center; color: var(--text-2); }
+.footer-note { max-width: 720px; margin-top: 56px; font-size: 12px; color: var(--text-3); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="icon-btn" id="navBtn" aria-label="目录">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="brand"><b id="brandTitle">双语精读</b><span id="brandSub"></span></div>
+  <div class="seg" role="group" aria-label="译文显示方式">
+    <span class="seg-label" style="align-self:center;padding:0 4px 0 6px">译文</span>
+    <button data-zh="show" aria-pressed="true">显示</button>
+    <button data-zh="cover" aria-pressed="false">遮挡</button>
+    <button data-zh="hide" aria-pressed="false">隐藏</button>
+  </div>
+  <div class="settings-wrap">
+    <button class="icon-btn" id="setBtn" aria-label="设置" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+    </button>
+    <div class="panel" id="panel">
+      <h4>显示内容</h4>
+      <div class="row-set"><span>经济学解读</span><button class="switch" data-opt="econ" aria-pressed="true" aria-label="经济学解读"></button></div>
+      <div class="row-set"><span>语言点</span><button class="switch" data-opt="lang" aria-pressed="true" aria-label="语言点"></button></div>
+      <div class="row-set"><span>段落要点</span><button class="switch" data-opt="sum" aria-pressed="true" aria-label="段落要点"></button></div>
+      <h4 style="margin-top:12px">外观</h4>
+      <div class="row-set"><span>字号</span>
+        <div class="seg"><button data-fs="-1">A−</button><button data-fs="0">默认</button><button data-fs="1">A+</button></div></div>
+      <div class="row-set"><span>主题</span>
+        <div class="seg"><button data-theme-set="auto">自动</button><button data-theme-set="light">浅色</button><button data-theme-set="dark">深色</button></div></div>
+      <div class="hint">“遮挡”模式下先读英文，点击句子再看译文。<br>快捷键：<kbd>T</kbd> 切换译文　<kbd>J</kbd>/<kbd>K</kbd> 上下句</div>
+    </div>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="layout">
+  <nav class="nav" id="nav" aria-label="目录"></nav>
+  <main><div class="content" id="content"></div></main>
+</div>
+
+<script src="data/book.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = (s, el) => (el || document).querySelector(s);
+  const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+  const BOOK = window.BOOK_INDEX;
+  // each book keeps its own reading position and settings, even when served from the same address
+  const KEY = (BOOK.storage_key || "readpdf") + ":";
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(KEY + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(KEY + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const md = s => esc(s || "").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  const NOTE_LABEL = BOOK.note_label || "解读";
+  document.title = `${BOOK.title_zh || BOOK.title} · 双语精读`;
+  $("#brandTitle").textContent = `${BOOK.title_zh || BOOK.title} · 双语精读`;
+  $("#brandSub").textContent = BOOK.title || "";
+  $$('[data-opt="econ"]').forEach(b => { b.setAttribute("aria-label", NOTE_LABEL); b.previousElementSibling.textContent = NOTE_LABEL; });
+
+  /* ---------------- settings */
+  const settings = Object.assign({ zh: "show", econ: true, lang: true, sum: true, fs: 0, theme: "auto" }, store.get("settings", {}));
+  function applySettings() {
+    document.body.classList.toggle("zh-cover", settings.zh === "cover");
+    document.body.classList.toggle("zh-hide", settings.zh === "hide");
+    document.body.classList.toggle("no-econ", !settings.econ);
+    document.body.classList.toggle("no-lang", !settings.lang);
+    document.body.classList.toggle("no-sum", !settings.sum);
+    document.documentElement.style.setProperty("--fs", (17 + settings.fs * 1.5) + "px");
+    if (settings.theme === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", settings.theme);
+    $$("[data-zh]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.zh === settings.zh)));
+    $$("[data-opt]").forEach(b => b.setAttribute("aria-pressed", String(!!settings[b.dataset.opt])));
+    $$("[data-fs]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.fs === settings.fs)));
+    $$("[data-theme-set]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeSet === settings.theme)));
+    store.set("settings", settings);
+  }
+  $$("[data-zh]").forEach(b => b.addEventListener("click", () => { settings.zh = b.dataset.zh; applySettings(); }));
+  $$("[data-opt]").forEach(b => b.addEventListener("click", () => { settings[b.dataset.opt] = !settings[b.dataset.opt]; applySettings(); }));
+  $$("[data-fs]").forEach(b => b.addEventListener("click", () => { settings.fs = +b.dataset.fs; applySettings(); }));
+  $$("[data-theme-set]").forEach(b => b.addEventListener("click", () => { settings.theme = b.dataset.themeSet; applySettings(); }));
+  const panel = $("#panel"), setBtn = $("#setBtn");
+  setBtn.addEventListener("click", e => { e.stopPropagation(); const o = panel.classList.toggle("open"); setBtn.setAttribute("aria-expanded", o); });
+  document.addEventListener("click", e => { if (!panel.contains(e.target) && e.target !== setBtn) panel.classList.remove("open"); });
+  const nav = $("#nav"), scrim = $("#scrim");
+  const closeNav = () => { nav.classList.remove("open"); scrim.classList.remove("open"); };
+  $("#navBtn").addEventListener("click", () => { nav.classList.toggle("open"); scrim.classList.toggle("open"); });
+  scrim.addEventListener("click", closeNav);
+  applySettings();
+
+  /* ---------------- chapter loading (script tags work from file://) */
+  function loadChapter(cid) {
+    return new Promise((resolve, reject) => {
+      if (window.BOOK_DATA && window.BOOK_DATA[cid]) return resolve(window.BOOK_DATA[cid]);
+      const s = document.createElement("script");
+      s.src = "data/" + cid + ".js?v=" + Date.now();  // chapters get regenerated; never use a stale copy
+      s.onload = () => resolve(window.BOOK_DATA[cid]);
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  /* ---------------- rendering */
+  function sentenceHTML(s) {
+    let h = `<div class="sent" data-sid="${s.id}"><div class="en">${s.en}</div>`;
+    if (s.zh) h += `<div class="zh">${md(s.zh)}</div>`;
+    if (s.n) h += `<div class="note econ"><span class="tag">解读</span><div>${md(s.n)}</div></div>`;
+    if (s.l) h += `<div class="note lang"><span class="tag">语言</span><div>${md(s.l)}</div></div>`;
+    return h + `</div>`;
+  }
+  function sideHTML(p) {
+    let h = "";
+    for (const t of p.terms || []) {
+      h += `<div class="term" id="term-${slug(t.term)}"><div class="t-label">KEY TERM · 术语</div>
+        <div><span class="t-en">${esc(t.term)}</span><span class="t-zh">${esc(t.zh)}</span></div>
+        <div class="t-def">${esc(t.def)}</div><div class="t-def-zh">${esc(t.def_zh)}</div></div>`;
+    }
+    for (const ph of p.photos || []) {
+      h += `<figure class="photo"><img src="${ph.src}" alt="${esc(ph.caption)}" loading="lazy">
+        <figcaption><div class="c-en">${esc(ph.caption)}</div><div class="c-zh">${md(ph.zh)}</div>
+        ${ph.n ? `<div class="c-n">${md(ph.n)}</div>` : ""}</figcaption></figure>`;
+    }
+    return h;
+  }
+  function paraHTML(p) {
+    const side = sideHTML(p);
+    return `<div class="row"><section class="para ${p.type}" id="${p.id}" data-para>
+      <div class="para-meta"><a href="#${p.id}">¶ ${parseInt(p.id.slice(1), 10)}</a>${p.page != null ? `<span>原书 p.${p.page}</span>` : ""}</div>
+      ${p.sentences.map(sentenceHTML).join("")}
+      ${p.sum ? `<div class="sum"><span class="tag">要点</span><div>${md(p.sum)}</div></div>` : ""}
+    </section><aside class="side">${side ? `<div class="side-inner">${side}</div>` : ""}</aside></div>`;
+  }
+  function principlesTable(ch, b) {
+    const groups = [];
+    for (const x of ch.blocks) {
+      if (x.type !== "heading" || /Conclusion/.test(x.text)) continue;
+      if (x.level === 1) groups.push({ h: x, items: [] });
+      else if (groups.length) groups[groups.length - 1].items.push(x);
+    }
+    let rows = "";
+    for (const g of groups) {
+      rows += `<tr><th colspan="2">${esc(g.h.text)}　${esc(g.h.zh)}</th></tr>`;
+      for (const it of g.items) {
+        const m = it.text.match(/^Principle (\d+):\s*(.*)$/);
+        const zh = it.zh.replace(/^原理[一二三四五六七八九十]+：/, "");
+        rows += `<tr><td class="k">${m ? m[1] : ""}</td><td><div class="p-en">${esc(m ? m[2] : it.text)}</div><div class="p-zh">${esc(zh)}</div></td></tr>`;
+      }
+    }
+    return rows;
+  }
+  function blockHTML(ch, b) {
+    switch (b.type) {
+      case "heading":
+        if (b.level === 1) return `<div class="h1" id="${b.id}"><div class="num">${esc(b.num)}</div><h2>${esc(b.text)}</h2><div class="zh">${esc(b.zh)}</div></div>`;
+        { const m = b.text.match(/^Principle (\d+):\s*(.*)$/);
+          const badge = m ? "原理 " + m[1] : esc(b.num);
+          return `<div class="h2" id="${b.id}">${badge ? `<span class="badge">${badge}</span>` : ""}<div><h3>${esc(m ? m[2] : b.text)}</h3><div class="zh">${esc(b.zh.replace(/^原理[一二三四五六七八九十]+：/, ""))}</div></div></div>`; }
+      case "para": case "quote": case "bullets":
+        return paraHTML(b);
+      case "box": {
+        const isCase = /CASE/i.test(b.label);
+        let extra = "";
+        if (b.intro) extra += `<div class="news-intro">${esc(b.intro)}<span class="zh2">${md(b.intro_zh)}</span></div>`;
+        if (b.headline) extra += `<div class="news-head"><div class="h-en">${esc(b.headline)}</div><div class="h-zh">${md(b.headline_zh)}</div>
+          ${b.byline ? `<div class="by">${esc(b.byline)}${b.byline_zh ? "　" + esc(b.byline_zh) : ""}</div>` : ""}</div>`;
+        return `<div class="box ${isCase ? "case" : "fyi"}" id="${b.id}"><div class="box-head">
+          <div class="box-label">${esc(b.label)}<i>${esc(b.label_zh)}</i></div>
+          <div class="box-title">${esc(titleCase(b.title))}</div><div class="box-title-zh">${esc(b.title_zh)}</div></div>
+          ${extra}${b.blocks.map(x => blockHTML(ch, x)).join("")}
+          ${b.author ? `<div class="box-src"><i>${esc(b.author)}</i>${b.author_zh ? "　" + esc(b.author_zh) : ""}</div>` : ""}
+          ${b.source ? `<div class="box-src">${esc(b.source)}</div>` : ""}</div>`;
+      }
+      case "experts": {
+        const item = it => {
+          const r = it.results || {};
+          const seg = (k, label) => r[k] ? `<span class="${k}" style="width:${r[k]}%" title="${label} ${r[k]}%">${r[k] >= 9 ? `${label} ${r[k]}%` : ""}</span>` : "";
+          return `<div class="x-prop">${esc(it.proposition)}</div><div class="x-prop-zh zh">${md(it.zh)}</div>
+            <div class="bar" role="img" aria-label="同意 ${r.agree || 0}%，不确定 ${r.uncertain || 0}%，不同意 ${r.disagree || 0}%">
+              ${seg("agree", "同意")}${seg("uncertain", "不确定")}${seg("disagree", "不同意")}</div>`;
+        };
+        return `<div class="experts" id="${b.id}"><div class="x-label">ASK THE EXPERTS<i>问问专家</i></div>
+          <div class="x-title">${esc(b.title)}<span>${esc(b.title_zh)}</span></div>
+          ${(b.items || []).map(item).join("")}
+          <div class="x-src">${esc(b.source)}</div>
+          ${b.n ? `<div class="note econ"><span class="tag">解读</span><div>${md(b.n)}</div></div>` : ""}</div>`;
+      }
+      case "math":
+        return `<div class="math" id="${b.id}"><div class="m-en">${b.html}</div>${b.zh ? `<div class="m-zh">${b.zh}</div>` : ""}</div>`;
+      case "quickquiz":
+        return `<div class="quiz-card" id="${b.id}"><div class="q-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>
+          Quick Quiz · 随堂自测</div><ol>${b.items.map(it => `<li><div class="q-en">${esc(it.en)}</div><div class="q-zh">${md(it.zh)}</div>
+          ${it.hint ? `<details class="hint"><summary>参考思路</summary><div>${md(it.hint)}</div></details>` : ""}</li>`).join("")}</ol></div>`;
+      case "table": case "figure": {
+        const isPrinciples = b.type === "table" && /Ten Principles/i.test(b.title);
+        if (isPrinciples) {
+          return `<div class="table-card" id="${b.id}"><div class="tc-head"><div class="tc-label">${esc(b.label.toUpperCase())}</div>
+            <div class="tc-title">${esc(b.title)}<span>${esc(b.title_zh)}</span></div></div>
+            <table class="principles">${principlesTable(ch, b)}</table>
+            ${b.n ? `<div class="tc-note">${md(b.n)}</div>` : ""}
+            <details><summary>查看原书表格</summary><img src="${b.src}" alt="${esc(b.label)}" loading="lazy"></details></div>`;
+        }
+        const label = b.label.replace(/^Figure/, "FIGURE").replace(/^Table/, "TABLE");
+        const zhLabel = (b.type === "table" ? "表 " : "图 ") + b.label.split(" ")[1];
+        const img = b.src ? `<img class="fig-img" src="${b.src}" alt="${esc(b.label + " " + b.title)}" loading="lazy">` : "";
+        return `<div class="fig-card" id="${b.id}"><div class="tc-head"><div class="tc-label">${esc(label)}　${esc(zhLabel)}</div>
+          <div class="tc-title">${esc(b.title)}<span>${esc(b.title_zh)}</span></div></div>
+          ${b.rows ? `<ol class="rows">${b.rows.map(r => `<li><div><div class="r-en">${esc(r.en)}</div><div class="r-zh zh">${md(r.zh)}</div></div></li>`).join("")}</ol>` : img}
+          ${b.caption ? `<div class="cap"><div class="c-en">${esc(b.caption)}</div><div class="c-zh zh">${md(b.caption_zh)}</div></div>` : ""}
+          ${b.n ? `<div class="tc-note"><span class="tag">解读</span><div>${md(b.n)}</div></div>` : ""}
+          ${b.source ? `<div class="src">${esc(b.source)}</div>` : ""}
+          ${b.rows && img ? `<details class="orig"><summary>查看原书表格</summary>${img}</details>` : ""}</div>`;
+      }
+    }
+    return "";
+  }
+  function titleCase(s) {
+    if (s !== s.toUpperCase()) return s;
+    const small = new Set(["a", "an", "the", "of", "and", "or", "in", "on", "to", "for", "by", "with", "at"]);
+    return s.toLowerCase().split(" ").map((w, i) => (i && small.has(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  }
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  function iterParas(blocks, out = []) {
+    for (const b of blocks) {
+      if (b.type === "box") iterParas(b.blocks, out);
+      else if (b.sentences) out.push(b);
+    }
+    return out;
+  }
+
+  function endHTML(ch) {
+    let h = "";
+    const e = ch.end || {};
+    if (e.quiz && e.quiz.length) {
+      h += `<section class="end-section" id="end-quiz"><h2>Chapter Quick Quiz</h2><div class="sub">章末测验 · 点击选项作答，答完会显示解析</div>
+        <div class="score" id="score">得分 <b>0</b> / ${e.quiz.length}<button class="icon-btn" id="quizReset">重做</button></div>`;
+      for (const [i, q] of e.quiz.entries()) {
+        h += `<div class="mcq" data-answer="${q.answer}" data-q="${q.id}"><div class="stem">${i + 1}. ${esc(q.stem)} …</div><div class="stem-zh">${esc(q.stem_zh)}……</div>
+          ${q.options.map(o => `<button class="opt" data-k="${o.key}"><span class="k">${o.key}.</span><span><div class="o-en">${esc(o.en)}</div><div class="o-zh">${esc(o.zh)}</div></span></button>`).join("")}
+          <div class="explain"><b>答案：${q.answer}</b>　${md(q.explain)}</div></div>`;
+      }
+      h += `</section>`;
+    }
+    if (e.summary && e.summary.length) {
+      h += `<section class="end-section" id="end-summary"><h2>Summary</h2><div class="sub">本章小结</div><ul class="summary-list">
+        ${e.summary.map(s => `<li><div class="s-en">${esc(s.en)}</div><div class="s-zh">${md(s.zh)}</div></li>`).join("")}</ul></section>`;
+    }
+    if (ch.glossary && ch.glossary.length) {
+      h += `<section class="end-section" id="end-gloss"><h2>Key Concepts</h2><div class="sub">本章术语 · ${ch.glossary.length} 个</div><table class="gloss">
+        ${ch.glossary.map(g => `<tr><td class="g-term">${esc(g.term)}<small>${esc(g.zh)}</small></td>
+          <td><div class="g-def">${esc(g.def)}</div><div class="g-def-zh">${esc(g.def_zh)}</div></td>
+          <td>${g.para ? `<a href="#${g.para}">p.${g.page} →</a>` : ""}</td></tr>`).join("")}</table></section>`;
+    }
+    return h;
+  }
+
+  function navHTML(ch) {
+    let h = `<h5>本章</h5><a href="#top">导读</a>`;
+    for (const b of ch.blocks) {
+      if (b.type !== "heading") continue;
+      const m = b.text.match(/^Principle (\d+):/);
+      const label = b.level === 1 ? `${b.num} ${b.zh}` : (m ? b.zh : b.zh);
+      h += `<a class="${b.level === 1 ? "l1" : "l2"}" href="#${b.id}" data-target="${b.id}">${esc(label)}</a>`;
+    }
+    const e = ch.end || {};
+    if (e.quiz) h += `<a class="l1" href="#end-quiz" data-target="end-quiz">章末测验</a>`;
+    if (e.summary) h += `<a class="l1" href="#end-summary" data-target="end-summary">本章小结</a>`;
+    if (ch.glossary.length) h += `<a class="l1" href="#end-gloss" data-target="end-gloss">本章术语</a>`;
+    for (const b of ch.appendix || []) {
+      if (b.type !== "heading") continue;
+      h += b.level === 1
+        ? `<a class="l1" href="#${b.id}" data-target="${b.id}">附录：${esc(b.zh)}</a>`
+        : `<a class="l2" href="#${b.id}" data-target="${b.id}">${esc(b.zh)}</a>`;
+    }
+    h += `<h5>全书章节</h5>`;
+    for (const c of BOOK.chapters) {
+      const cls = c.id === ch.id ? "current" : (c.available ? "" : "off");
+      h += c.available
+        ? `<a class="chap ${cls}" href="#${c.id}" data-chapter="${c.id}"><span class="n">${c.number}</span><span>${esc(c.title_zh)}</span></a>`
+        : `<span class="nav-off"><a class="chap off" title="尚未生成"><span class="n">${c.number}</span><span>${esc(c.title_zh)}</span></a></span>`;
+    }
+    return h;
+  }
+
+  let current = null, observer = null;
+  async function show(cid, anchor) {
+    const content = $("#content");
+    let ch;
+    try { ch = await loadChapter(cid); } catch (e) { ch = null; }
+    if (!ch) { content.innerHTML = `<div class="empty">这一章还没有生成。</div>`; return; }
+    current = ch;
+    store.set("chapter", cid);
+    document.title = `第${ch.number}章 ${ch.title_zh} · 双语精读`;
+    $("#brandTitle").textContent = `第${ch.number}章　${ch.title_zh}`;
+    $("#brandSub").textContent = ch.title;
+    const appendix = ch.appendix || [];
+    const paras = iterParas(ch.blocks.concat(appendix));
+    const nSent = paras.reduce((a, p) => a + p.sentences.length, 0);
+    const countFigs = bs => bs.reduce((n, b) => n + (b.type === "figure" || b.type === "table" ? 1 : 0)
+      + (b.type === "box" ? countFigs(b.blocks) : 0), 0);  // figures inside boxes count too
+    const nFig = countFigs(ch.blocks.concat(appendix));
+    let h = `<div id="top" class="chapter-head"><div class="eyebrow">Chapter ${ch.number}</div><h1>${esc(ch.title)}</h1>
+      <div class="zh-title">${esc(ch.title_zh)}</div>
+      <div class="stats">${ch.pages[0] != null ? `<span>原书 p.${ch.pages[0]}–${ch.pages[1]}</span>` : ""}<span>${paras.length} 段 · ${nSent} 句</span><span>${ch.glossary.length} 个术语</span>${nFig ? `<span>${nFig} 个图表</span>` : ""}${appendix.length ? `<span>含附录</span>` : ""}</div>
+      <button class="resume" id="resume"></button></div>`;
+    if (ch.guide && ch.guide.length) h += `<div class="guide"><h3>本章导读</h3>${ch.guide.map(p => `<p>${md(p)}</p>`).join("")}</div>`;
+    h += ch.blocks.map(b => blockHTML(ch, b)).join("");
+    h += endHTML(ch);
+    if (appendix.length) {
+      h +=`<div class="appendix-head" id="appendix"><div class="eyebrow">Appendix · 附录</div>
+        ${(ch.appendix_guide || []).map(p => `<p>${md(p)}</p>`).join("")}</div>`;
+      h += appendix.map(b => blockHTML(ch, b)).join("");
+    }
+    if (BOOK.source_note) h += `<div class="footer-note">${BOOK.source_note}</div>`;
+    content.innerHTML = h;
+    nav.innerHTML = navHTML(ch);
+    wireChapter(ch);
+    const last = store.get("pos:" + cid, null);
+    if (anchor && document.getElementById(anchor)) {
+      document.getElementById(anchor).scrollIntoView();
+    } else {
+      window.scrollTo(0, 0);
+      if (last && document.getElementById(last)) {
+        const r = $("#resume");
+        r.textContent = `继续上次阅读：¶ ${parseInt(last.slice(1), 10)} →`;
+        r.classList.add("show");
+        r.onclick = () => document.getElementById(last).scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }
+
+  function wireChapter(ch) {
+    // nav links close drawer on mobile
+    $$("a", nav).forEach(a => a.addEventListener("click", closeNav));
+    // multiple-choice quiz
+    const answers = store.get("quiz:" + ch.id, {});
+    $$(".mcq").forEach(card => {
+      if (answers[card.dataset.q]) mark(card, answers[card.dataset.q]);
+      $$(".opt", card).forEach(btn => btn.addEventListener("click", () => {
+        answers[card.dataset.q] = btn.dataset.k; store.set("quiz:" + ch.id, answers); mark(card, btn.dataset.k);
+      }));
+    });
+    const reset = $("#quizReset");
+    if (reset) reset.addEventListener("click", () => {
+      store.set("quiz:" + ch.id, {});
+      $$(".mcq").forEach(card => { card.classList.remove("done"); $$(".opt", card).forEach(o => { o.disabled = false; o.classList.remove("right", "wrong"); }); });
+      for (const k in answers) delete answers[k];
+      updateScore();
+    });
+    updateScore();
+    // track position + active nav item
+    if (observer) observer.disconnect();
+    const navLinks = new Map($$("a[data-target]", nav).map(a => [a.dataset.target, a]));
+    const anchors = $$(".h1, .h2, [data-para], .end-section");
+    let lastHeading = null;
+    observer = new IntersectionObserver(entries => {
+      for (const en of entries) {
+        if (!en.isIntersecting) continue;
+        const el = en.target;
+        if (el.matches("[data-para]")) store.set("pos:" + ch.id, el.id);
+        let hid = el.matches(".h1, .h2, .end-section") ? el.id : null;
+        if (!hid) {
+          let prev = el.closest(".row") || el;
+          while (prev && !(prev.matches && prev.matches(".h1, .h2, .end-section"))) prev = prev.previousElementSibling || (prev.parentElement && prev.parentElement.closest(".box"));
+          hid = prev ? prev.id : null;
+        }
+        if (hid && hid !== lastHeading && navLinks.has(hid)) {
+          lastHeading = hid;
+          navLinks.forEach(a => a.classList.remove("active"));
+          navLinks.get(hid).classList.add("active");
+        }
+      }
+    }, { rootMargin: "-80px 0px -60% 0px" });
+    anchors.forEach(a => observer.observe(a));
+  }
+  function mark(card, k) {
+    card.classList.add("done");
+    $$(".opt", card).forEach(o => {
+      o.disabled = true;
+      if (o.dataset.k === card.dataset.answer) o.classList.add("right");
+      else if (o.dataset.k === k) o.classList.add("wrong");
+    });
+    updateScore();
+  }
+  function updateScore() {
+    const s = $("#score b");
+    if (!s) return;
+    s.textContent = $$(".mcq.done").filter(c => !$(".opt.wrong", c)).length;
+  }
+  function onContentClick(e) {
+    const sent = e.target.closest(".sent");
+    const loose = e.target.closest(".zh");
+    if (!sent && loose && document.body.classList.contains("zh-cover")) { loose.classList.toggle("revealed"); return; }
+    if (!sent || e.target.closest("a, button, details")) return;
+    if (document.body.classList.contains("zh-cover")) sent.classList.toggle("revealed");
+    setFocus(sent, false);
+  }
+  let focused = null;
+  function setFocus(sent, scroll) {
+    if (focused) focused.classList.remove("focus");
+    focused = sent;
+    if (!sent) return;
+    sent.classList.add("focus");
+    if (scroll) sent.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+  document.addEventListener("keydown", e => {
+    if (e.target.closest("input, textarea, select") || e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k === "t") { const order = ["show", "cover", "hide"]; settings.zh = order[(order.indexOf(settings.zh) + 1) % 3]; applySettings(); }
+    else if (k === "j" || k === "k") {
+      const all = $$(".sent");
+      if (!all.length) return;
+      let i = focused ? all.indexOf(focused) : -1;
+      if (i < 0) { const y = 90; i = all.findIndex(s => s.getBoundingClientRect().bottom > y) - (k === "j" ? 1 : 0); }
+      i = Math.max(0, Math.min(all.length - 1, i + (k === "j" ? 1 : -1)));
+      setFocus(all[i], true);
+    } else if (k === " " && focused && document.body.classList.contains("zh-cover")) {
+      e.preventDefault(); focused.classList.toggle("revealed");
+    }
+  });
+
+  window.addEventListener("scroll", () => {
+    const h = document.documentElement;
+    const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+    $("#progress").style.width = (p * 100).toFixed(1) + "%";
+  }, { passive: true });
+
+  function route() {
+    const hash = decodeURIComponent(location.hash.slice(1));
+    const m = hash.match(/^(ch\d\d)(?:\/(.+))?$/);
+    if (m) { if (!current || current.id !== m[1]) show(m[1], m[2]); else if (m[2]) document.getElementById(m[2])?.scrollIntoView(); return true; }
+    return false;
+  }
+  window.addEventListener("hashchange", () => { route(); });
+  $("#content").addEventListener("click", onContentClick);
+  if (!route()) {
+    const first = store.get("chapter", null) || (BOOK.chapters.find(c => c.available) || {}).id;
+    if (first) show(first);
+  }
+})();
+</script>
+</body>
+</html>

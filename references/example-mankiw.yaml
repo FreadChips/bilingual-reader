@@ -1,0 +1,117 @@
+# Profile for Mankiw, Principles of Microeconomics 8e (Cengage, 2018).
+# Read by the bilingual-reader toolkit (~/.claude/skills/bilingual-reader); schema in references/profile.md.
+
+book:
+  title: Principles of Microeconomics (8e)
+  title_zh: 微观经济学原理（第8版）
+  author: N. Gregory Mankiw
+  subject: 经济学                 # notes are "经济学解读"
+  source_note: >-
+    原文摘自 N. Gregory Mankiw, <i>Principles of Microeconomics</i>, 8th ed.（Cengage, 2018），仅供个人学习使用，请勿传播。中文翻译与解读为学习辅助，不是官方译本。
+  epub_name: Mankiw-Microeconomics-8e-bilingual
+  epub_id: readpdf/mankiw-micro-8e-bilingual   # keeps the identifier of the EPUB exported before the toolkit
+  storage_key: readpdf             # browser storage prefix; keeps reading positions saved before the toolkit existed
+
+source:
+  type: pdf
+  engine: rules                      # the hand-tuned rule engine (layout.roles below)
+  file: Principles-of-Microeconomics-8e-2018.pdf
+
+chapters:
+  outline_pattern: '^Chapter (\d+):\s*(.*)'
+  titles_zh:
+    1: 经济学十大原理
+    2: 像经济学家一样思考
+    3: 相互依存性与贸易的好处
+    4: 供给与需求的市场力量
+    5: 弹性及其应用
+    6: 供给、需求与政府政策
+    7: 消费者、生产者与市场效率
+    8: 应用：税收的代价
+    9: 应用：国际贸易
+    10: 外部性
+    11: 公共物品和公共资源
+    12: 税制的设计
+    13: 生产成本
+    14: 竞争市场上的企业
+    15: 垄断
+    16: 垄断竞争
+    17: 寡头
+    18: 生产要素市场
+    19: 收入与歧视
+    20: 收入不平等与贫困
+    21: 消费者选择理论
+    22: 微观经济学前沿
+
+layout:
+  page_offset: 32                  # pdf page index − printed page number
+  pages:                           # keyed by the parity of the printed page number
+    even: {main_left: 180, margin: {x1_max: 176}}   # margin notes in the left column
+    odd: {main_left: 72, margin: {x0_min: 440}}     # ... and in the right column
+  body_font: Palatino              # prefix: displayed quotations, box text interrupted by body text
+  box_font: Cn18                   # substring: text of FYI / Case Study / In the News boxes
+  box_quote_marker: Obl            # a box block set wholly in this style is a quotation
+  end_mark_font: ZapfDingbats      # the ■ that ends a box
+  symbol_fonts: [WWDOC01, MathematicalPi]
+  symbol_map: {"5": "=", "3": "×", "2": "−", "1": "+", ",": "<", ".": ">"}
+  heading_number: '(\d+-\d+[a-z]?)\s+(.*)'
+  roles:                           # first match wins; anything else is body text
+    - {role: dropcap, font_has: TradeGothic, size_min: 20, text_max_len: 2}
+    - {role: skip, any: [{font: Helvetica}, {font_has: UniversLTStd-LightCn}], note: "copyright line, photo credit"}
+    - {role: skip, font: Avenir, size_lt: 9, y_outside: [50, 650], note: "running head, folio"}
+    - {role: skip, font: Frutiger, note: "text inside graphs"}
+    - {role: chapter_title, any: [{font: UtopiaStd, size_gt: 20}, {font: Avenir, size_min: 16}]}
+    - {role: h1, font: UtopiaStd-Semibold, size_min: 16}
+    - {role: h2, font: UtopiaStd-Bold, size_min: 11, size_max: 13}
+    - {role: label, any: [{font: AvenirLTStd-Heavy-SC750}, {font: AvenirLTStd, size_min: 10, text_contains: Quick}]}
+    - {role: label, any: [{font: AvenirLTStd-Black, size_min: 13}, {font: AvenirLTStd, size_gt: 14}]}
+    - {role: box_title, font: AvenirLTStd-Black, size_eq: 9}
+    - {role: box_title, font: UtopiaStd-Semibold, size_min: 13, size_lt: 16}
+    - {role: news_intro, font: UtopiaStd-Italic}
+    - {role: news_headline, font: TradeGothicLTStd-Bold, size_min: 10.5}
+    - {role: news_byline, font: TradeGothicLTStd-Bd2, size_lt: 8.6, text_starts: "By "}
+    - {role: source, font_has: Cn18, size_lt: 8, text_starts: Source}
+    - {role: margin_def, font: TradeGothicLTStd, font_not_has: Cn, in_margin: true}
+    - {role: caption, font: PalatinoLTStd-Italic, in_margin: true}
+    - {role: caption, font: TradeGothicLTStd-Cn18, size_lt: 9}
+    - {role: quiz, any: [{font: TradeGothicLTStd-Obl}, {font: TradeGothicLTStd, text_contains: Quick}]}
+
+captions:
+  photo_italic_font: PalatinoLTStd-Italic   # a lone line in this font under a wide photo is its caption
+
+figures:
+  label_pattern: '^(FIGURE|TABLE)\s*([A-Z]?-?\d+)$'   # matched against the upper-cased label line
+  title: {font_ends: -Bold, size_lt: 10.5, font_not: Helvetica}
+  caption: {font_in: [TradeGothicLTStd, TradeGothicLTStd-Obl], size_max: 8.6}
+  rows: {font_in: [TradeGothicLTStd], size_gt: 8.6}
+  source: {font_has: Cn18, size_lt: 8}
+
+quick_quiz:
+  label: Quick Quiz
+  continue: {font: TradeGothicLTStd, font_not_has: Cn}   # upright lines inside the oblique quiz
+
+experts:
+  label: ASK THE EXPERTS
+  proposition: {font_has: Cn18, size_min: 8.5}
+  percent_font: Frutiger
+
+margin_glossary:
+  term_marker: Bd                  # the bold term that opens a margin definition
+
+end_matter:
+  banner: {font: Avenir, size_min: 10.5, size_max: 12, text_starts_ci: CHAPTER}
+  fallback_start: SUMMARY
+  sections:
+    - {key: quiz, contains: QUICK}
+    - {key: summary, starts: SUMMARY}
+    - {key: key_concepts, starts: KEY CONCEPT}
+    - {key: review, starts: QUESTIONS FOR REVIEW}
+    - {key: problems, starts: PROBLEMS}
+
+appendix:
+  title: {text_eq: Appendix, size_min: 25}
+
+cover:                             # the CJK cover font sets Latin digits at full width, so write 第八版 not 第8版
+  title: 微观经济学原理
+  subtitle: （第八版）双语精读本
+  english: Principles of Microeconomics, 8e
