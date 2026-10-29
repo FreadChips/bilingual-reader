@@ -114,7 +114,7 @@ def main():
               f"({len(numbers)} chapter numbers; the first entry of each number is used), e.g.:")
         for l in matched[:5]:
             print(f"  {l}")
-    else:
+    elif kind != "html":
         print("one chapter: the whole document is chapter 1" + ("" if material == "paper" else " (no outline)")
               + "; check book.title")
     if kind == "pdf":
