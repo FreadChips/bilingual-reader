@@ -7,8 +7,28 @@ self.glossary, self.photos, self.endmatter and self.pages in run().
 """
 import json
 import re
+import sys
+import traceback
 import unicodedata
 from collections import Counter
+
+
+def extract_each(nums, extract_one):
+    """Run extract_one(num) for every chapter. A chapter that fails is reported and the rest still run,
+    so one crash cannot hide the chapters after it; the run then exits non-zero naming the failures."""
+    failed = []
+    for num in nums:
+        try:
+            extract_one(num)
+        except SystemExit as e:  # a deliberate stop: a label naming no region, a patch that matches nothing
+            print(f"ch{num:02d} FAILED: {e}", file=sys.stderr)
+            failed.append(num)
+        except Exception:
+            print(f"ch{num:02d} FAILED:", file=sys.stderr)
+            traceback.print_exc()
+            failed.append(num)
+    if failed:
+        raise SystemExit(f"{len(failed)} chapter(s) failed: {', '.join(f'ch{n:02d}' for n in failed)}")
 
 
 class ChapterBase:

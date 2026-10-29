@@ -12,7 +12,7 @@ from html.parser import HTMLParser
 from pathlib import PurePosixPath
 from urllib.parse import unquote
 
-from chapterkit import ChapterBase
+from chapterkit import ChapterBase, extract_each
 from textkit import clean_markup, split_sentences
 
 EPUB_DEFAULTS = {
@@ -436,9 +436,10 @@ def extract(book, nums):
         _, path, frag, _ = pkg.toc[i]
         return lin.anchor_pos.get((path, frag), lin.anchor_pos.get((path, "")))
 
-    for num, title, i in entries:
-        if nums and num not in nums:
-            continue
+    by_num = {e[0]: e for e in entries}
+
+    def extract_one(num):
+        _, title, i = by_num[num]
         start, depth = pos(i), pkg.toc[i][3]
         # the chapter runs to the next TOC entry at the same or a higher level
         later = [pos(j) for j in range(i + 1, len(pkg.toc)) if pkg.toc[j][3] <= depth]
@@ -447,3 +448,4 @@ def extract(book, nums):
         ch = EpubChapter(book, pkg, num, title, lin.events[start:end])
         ch.run()
         ch.write()
+    extract_each([e[0] for e in entries if not nums or e[0] in nums], extract_one)

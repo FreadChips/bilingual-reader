@@ -19,7 +19,7 @@ from collections import Counter
 import pymupdf
 import yaml
 
-from chapterkit import ChapterBase
+from chapterkit import ChapterBase, extract_each
 from pdf_layout import (BULLETS, LIGATURES, LayoutCache, PageSet, auto_config, body_style, chapter_ranges, first_line, norm,
                         same_title,
                         region_text, xy_cut)
@@ -583,13 +583,14 @@ def extract(book, nums):
                     for w in re.findall(r"[A-Za-z][A-Za-z\-]*[A-Za-z]", page.get_text().translate(LIGATURES)))
     sample = [p for c in chapters.values() for p in range(c[2], c[3] + 1)]
     style = body_style(doc, sample[:: max(1, len(sample) // 60)])
+    def extract_one(num):
+        if num not in chapters:
+            raise SystemExit(f"chapter {num} not in the outline (found {sorted(chapters)})")
+        ch = AutoChapter(book, doc, chapters[num], vocab, cache, acfg, style)
+        ch.run()
+        ch.write()
+        ch.write_layout()
     try:
-        for num in nums or sorted(chapters):
-            if num not in chapters:
-                raise SystemExit(f"chapter {num} not in the outline (found {sorted(chapters)})")
-            ch = AutoChapter(book, doc, chapters[num], vocab, cache, acfg, style)
-            ch.run()
-            ch.write()
-            ch.write_layout()
+        extract_each(nums or sorted(chapters), extract_one)
     finally:
         cache.save()

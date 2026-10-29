@@ -1,12 +1,12 @@
 """Remove single-asterisk italics (*x*) from annotation JSON files; keep **bold** and stars used as
-symbols (k*, c*gold, f(k*)): the marked text must contain Chinese and the opening star must not
-follow an ASCII letter, digit or bracket. --dry lists the matches without writing."""
+symbols (k*, c*gold, f(k*), π*, πₜ*): the marked text must contain Chinese and the opening star
+must not follow a letter (any script), digit, subscript, prime or bracket. --dry lists the matches without writing."""
 import glob
 import json
 import re
 import sys
 
-PAT = re.compile(r'(?<![A-Za-z0-9)\]*])\*(?![*\s=])([^*\n"]*?[一-鿿][^*\n"]*?)(?<![\s*])\*(?![A-Za-z0-9*])')
+PAT = re.compile(r'(?<![A-Za-z0-9À-ɏͰ-Ͽ̀-ͯ⁰-₟)\]*′])\*(?![*\s=])([^*\n"]*?[一-鿿][^*\n"]*?)(?<![\s*])\*(?![A-Za-z0-9À-ɏͰ-Ͽ⁰-₟*])')
 dry = "--dry" in sys.argv
 sys.stdout.reconfigure(encoding="utf-8")
 n = 0

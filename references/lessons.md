@@ -76,6 +76,13 @@ were needed over 17 chapters; the extraction rules changed about ten times.
   files that were rewritten, so a crash hides every later chapter: "no changes" can mean "never
   ran". The auto test book crashed at ch. 2 (a figure label region opening with a chart word) for
   several rounds while its regression read clean. Count tracebacks in every regression log.
+- The italics stripper's guard ("no star right after an ASCII letter") missed Greek symbols: π*, πₜ*
+  read as an italic opening and would have lost their stars. The guard now covers Latin, Greek,
+  combining marks, sub/superscripts and primes, but not CJK (Chinese is what real italics wrap).
+  check.py uses the same pattern.
+- A crash used to stop `extract.py all`; now each chapter runs on its own and the failures are
+  listed at the end with a non-zero exit, and regress_all.py also flags any chapter file a run did
+  not rewrite.
 - Probe a new rule's geometry before trusting its thresholds. Mankiw's vector overbars sit within
   0.21 em of the glyph top; a radical's vinculum (2√k) and stray strokes in OpenStax and arXiv sat
   0.31–0.38 em above it, so the window is 0.25 em. Expect a few misses in running text all the same

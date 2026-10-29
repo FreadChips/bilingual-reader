@@ -59,7 +59,8 @@ keep curly apostrophes as in the source (`arrow’s impossibility theorem`).
   explanation.
 
 ## Checks before handing a chapter over
-1. `build.py N` → 0 problems.
+1. `build.py N` → 0 problems; `check.py N` → ok (shape, Chinese in every translation, writing
+   slips, density against book.yaml `annotation.notes_per_100`, reader data current).
 2. Reader: reload `#chNN`; count sentences, figures, boxes, quiz items; no "undefined" on the page;
    look at one figure and one box.
 3. Numbers in notes match the images; cross-references hold.

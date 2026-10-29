@@ -14,7 +14,7 @@ from collections import Counter
 import pymupdf
 
 from bookkit import as_list, rule_matches
-from chapterkit import ChapterBase
+from chapterkit import ChapterBase, extract_each
 from textkit import Joiner, clean_markup, span_markup, split_sentences, strip_tags
 
 CFG = {}  # the book profile, set by configure()
@@ -796,9 +796,10 @@ def extract(book, nums):
         raise SystemExit("no chapters found: check chapters.outline_pattern against the PDF outline "
                          "(font_profile.py prints it)")
     vocab = build_vocab(doc)
-    for num in nums or sorted(chapters):
+    def extract_one(num):
         if num not in chapters:
             raise SystemExit(f"chapter {num} not in the outline (found {sorted(chapters)})")
         ch = PdfChapter(book, doc, chapters[num], vocab)
         ch.run()
         ch.write()
+    extract_each(nums or sorted(chapters), extract_one)

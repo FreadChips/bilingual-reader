@@ -31,9 +31,13 @@ python -m venv .venv
 - 每本书的进度、章节大纲和交接说明在书目录的 `NOTES.md`。
 - agent 先读这两个文件再动手，做完一章就更新 `NOTES.md`。不依赖任何 agent 自己的记忆。
 
+## 每次开工
+
+在书目录里运行 `status.py`：每章的状态和下一步一目了然。每章交付前 `build.py N` 和 `check.py N` 都必须通过。
+
 ## 修改工具
 
-修改 `scripts/` 之前先按 `SKILL.md` 第 4 步做回归检查，改完在这个仓库里提交。
+修改 `scripts/` 之前运行 `regress_all.py save`，改完运行 `regress_all.py compare`，结果干净再在这个仓库里提交。测试书清单在 `testbed.yaml`：两本已注释的书，加上 `D:\Projects\bilingual-testbed` 里的三本测试书（曼昆微观 PDF 走自动引擎、OpenStax、arXiv ResNet）。运行日志在 `logs/`，不进 git。
 
 ## 版权
 
@@ -41,9 +45,7 @@ python -m venv .venv
 
 ## 已知问题（2026-10-29）
 
-- 回归测试书放在一个旧会话的临时目录里（`%LOCALAPPDATA%\Temp\claude\D--Projects-ReadPDF\8c38353a-…\scratchpad\` 下的 auto、os、ax），可能被清理，应该挪到固定位置。
-- auto 测试书（曼昆微观 PDF，自动引擎）和 10 月 27 日的快照相比有未审查的差异：句子召回 98.4%，标题 425/436，第 2 章少一张图。其中一部分可能是退步。
+- auto 测试书（曼昆微观 PDF，自动引擎）和 10 月 27 日的快照相比有未审查的差异：句子召回 98.4%，标题 425/436，第 2 章少一张图。其中一部分可能是退步。旧快照保存在 `D:\Projects\bilingual-testbed\auto\build\snapshot-2026-10-27`，用 `score.py build/snapshot-2026-10-27` 可以复现。现在的回归基准是 10 月 29 日的输出。
 - 论文（arXiv ResNet）：行首的 “Fig. 6 (middle) shows …” 被当成图注；图题在换行处截断（“Figure 4: Training on”）。
 - 表格只能当图片（PDF），或每行一个字符串（EPUB），没有单元格结构。
-- 不支持扫描版 PDF（需要 OCR），也不支持 HTML 输入。EPUB 输入只在一本合成书上测试过。
-- 还没有 `status.py` 和自动检查门槛：注释密度目标目前要人工对照 `quality.py` 的输出。
+- 不支持扫描版 PDF（需要 OCR），也不支持 HTML 输入。EPUB 输入只在一本合成书上测试过，而且不在回归测试书里。

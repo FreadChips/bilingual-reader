@@ -23,6 +23,9 @@ Tested with pymupdf 2.0 / pymupdf-layout 2.0 on Windows.
 Below, `K` is this skill's `scripts` folder.
 
 ## Ground rules
+- **Start every session with `python -I K/status.py`** in the book folder: one line per chapter
+  (extracted, labels, patches, annotated paragraphs, note density, check result, NOTES.md status) and
+  the next step. Do that step; do not start a chapter while an earlier one awaits the user's approval.
 - **Read `NOTES.md` in the book folder first, and update it when you finish.** It holds the status of
   every chapter, the chapter outline (for cross-references), and hand-over notes for the next chapter.
   Another agent or session may continue where you stop, and NOTES.md is all it gets.
@@ -85,12 +88,20 @@ Fix wording the source encodes badly with a patch (`patches/ch03.json`, ops in
 (`auto.rules` for PDFs).
 
 ## 4. Regression check after any rule or toolkit change
+A change to `scripts/` affects every book, so check all of them:
+```
+python -I K/regress_all.py save      # before the change: re-extracts every book in testbed.yaml, snapshots it
+python -I K/regress_all.py compare   # after it: re-extracts again and lists every changed sentence
+```
+`testbed.yaml` (in this skill folder) lists the annotated books and the test books (other layouts).
+Exit status 0 = no changes, 1 = a chapter crashed or was not rewritten, 2 = changes: read the log
+in `logs/`. Only the intended chapters may change; a shifted paragraph id breaks that chapter's
+annotations. A change to one book's book.yaml rules, patches or labels needs only that book:
 ```
 python -I K/regress.py save      # before the change
-python -I K/extract.py all       # after it (finished chapters at least)
+python -I K/extract.py all       # after it (a chapter that fails is reported, the others still run)
 python -I K/regress.py compare   # every changed sentence, id and figure position
 ```
-Only the intended chapters may change. A shifted paragraph id breaks that chapter's annotations.
 `score.py build/snapshot` summarises the same comparison as percentages and counts. Hand labels on
 an already annotated chapter need this check too.
 
@@ -106,11 +117,15 @@ Large chapters: split paragraphs across several paras-*.json files.
 ## 6. Build and check
 ```
 python -I K/build.py 3           # must end with "0 problems"
+python -I K/check.py 3           # must end with "ch03: ok"
 ```
+check.py needs no browser. It checks the annotation files' shape, that every sentence has a Chinese
+translation, writing slips (single-asterisk italics, unbalanced bold, HTML, wrong 第N章), the note
+density against `annotation.notes_per_100`, and that reader/data matches the source and the
+annotations and has the shape the reader expects.
 Open the reader (serve `reader/` with `python -m http.server`, or your agent's browser preview) at
 `#ch03`, reload, and confirm counts of `.sent`, `.fig-card`, `.box`, `.mcq` and that the page text has
 no "undefined". If your agent has no browser, say so in the hand-over so the user checks the page.
-Run `quality.py` and compare the chapter's density with `annotation.notes_per_100`.
 Update NOTES.md (status line, outline, hand-over notes), then hand the chapter to the user.
 
 ## 7. Finish the book

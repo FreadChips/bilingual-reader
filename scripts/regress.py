@@ -4,7 +4,8 @@ Usage: python regress.py [--book DIR] save        copy build/source/ch*.json to 
        python regress.py [--book DIR] compare     report every chapter that changed since the snapshot
 
 Run `save` before changing book.yaml rules, patches or the toolkit, then re-extract all finished
-chapters (extract.py all) and run `compare`. A changed sentence means its annotation may no longer
+chapters (extract.py all) and run `compare`. For a toolkit change, use regress_all.py, which does
+this for every book in testbed.yaml. A changed sentence means its annotation may no longer
 fit; a changed paragraph id means annotations keyed by that id point at the wrong paragraph.
 """
 import json
