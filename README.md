@@ -20,7 +20,7 @@
 需要：Python 3.10 以上、git，以及 Claude Code 或 Codex（或其他支持 SKILL.md 技能的 agent）。
 
 ```bash
-git clone https://github.com/<你的用户名>/bilingual-reader.git
+git clone https://github.com/FreadChips/bilingual-reader.git
 cd bilingual-reader
 ```
 
