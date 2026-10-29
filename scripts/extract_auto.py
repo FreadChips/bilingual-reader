@@ -216,10 +216,15 @@ class AutoChapter(ChapterBase):
         label = f"{word.title() if word.isupper() else word} {num}"
         pics = [m["bbox"] for m in u["regions"] if m["role"] == "picture"]
         lab = u["label_region"]
+
+        def in_picture(m):
+            if lab is not None and abs(m["bbox"].x0 - lab["bbox"].x0) <= 3 and m["bbox"].y0 >= lab["bbox"].y0:
+                return False  # set flush under the label: a title or caption beside the chart, inside a
+                #               picture box grown over the drawing (Mankiw's side captions)
+            centre = pymupdf.Point((m["bbox"].x0 + m["bbox"].x1) / 2, (m["bbox"].y0 + m["bbox"].y1) / 2)
+            return any(p.contains(centre) for p in pics)
         texts = sorted((m for m in u["regions"] if m is not lab and m["role"] != "picture" and m["lines"]
-                        and not any(p.contains(pymupdf.Point((m["bbox"].x0 + m["bbox"].x1) / 2,
-                                                             (m["bbox"].y0 + m["bbox"].y1) / 2)) for p in pics)),
-                       key=lambda m: (m["bbox"].y0, m["bbox"].x0))
+                        and not in_picture(m)), key=lambda m: (m["bbox"].y0, m["bbox"].x0))
         rest, title = "", ""
         if lab is not None:
             # chart text merged above the label ("Grade" | "FIGURE A-2 ..."): the caption starts at the label
