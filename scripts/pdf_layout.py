@@ -512,6 +512,7 @@ class PageSet:
             lines, images = page_lines(page, acfg)
             regions = make_regions(pno, cache.boxes(pno), lines, images, page.rect)
             self.split_mixed(pno, regions)
+            self.split_headings(pno, regions)
             grow_pictures(page, regions)
             self.pages[pno] = {"regions": regions, "images": images, "page": page,
                                "panels": find_panels(page, images, regions), "rules": find_rules(page)}
@@ -547,6 +548,27 @@ class PageSet:
                 r["lines"] = [l for l in r["lines"] if l not in out]
                 r["bbox"] = rect_of(r["lines"])
                 regions.append({"id": r["id"] + "m", "pno": pno, "bbox": rect_of(out), "cls": "text", "lines": out})
+
+    def split_headings(self, pno, regions):
+        """The model sometimes draws one region over a heading line and the paragraph under it
+        ("7-2b Using the Supply Curve …" | "Just as consumer surplus …"): when the first lines are an
+        outline entry word for word, all in one font, and the next line opens in another font, they
+        become a region of their own and the rest goes to p173.r5b. (A figure title run on into its
+        caption in the same type is left alone.)"""
+        for r in list(regions):
+            if r["cls"] not in ("text", "section-header", "list-item") or len(r["lines"]) < 2:
+                continue
+            for k in range(1, min(3, len(r["lines"]) - 1) + 1):
+                head, nxt = r["lines"][:k], r["lines"][k]
+                fonts = {s["font"] for l in head for s in l["spans"] if s["text"].strip()}
+                first = next((s["font"] for s in nxt["spans"] if s["text"].strip()), None)
+                text = norm(" ".join(l["text"] for l in head))
+                if len(fonts) == 1 and first not in fonts and len(text) >= 3 \
+                        and any(norm(title) == text for _, title in self.toc):
+                    rest = r["lines"][k:]
+                    r["lines"], r["bbox"] = head, rect_of(head)
+                    regions.append({"id": r["id"] + "b", "pno": pno, "bbox": rect_of(rest), "cls": "text", "lines": rest})
+                    break
 
     def note(self, region, msg):
         self.notes.append((region["pno"], region["id"], msg))
@@ -631,9 +653,12 @@ class PageSet:
                 fl = first_line(r)
                 long_prose = len(text) > 150 or (text.rstrip().endswith(".") and len(text) > 80 and not fl["bold"])
                 # a heading never starts in lower case: that is a sentence running on from the last column
-                # ... nor ends with a full stop: "Chapters 7 and 8.)" is the tail of a sentence
-                if (long_prose or text.lstrip()[:1].islower() or re.search(r"\w\.\)?$", text.strip())) \
-                        and not self.toc_level(text):
+                # ... nor ends with a full stop: "Chapters 7 and 8.)" is the tail of a sentence, unless it is
+                # in title case ("Income Inequality Is Not Rising Globally. It's Falling.", a news headline)
+                long_words = re.findall(r"[A-Za-z][\w’']{3,}", text)
+                title_case = len(long_words) >= 3 and sum(w[0].isupper() for w in long_words) >= 0.8 * len(long_words)
+                if (long_prose or text.lstrip()[:1].islower()
+                        or (re.search(r"\w\.\)?$", text.strip()) and not title_case)) and not self.toc_level(text):
                     r["role"] = "body"
             # big digits on the opening page (a chapter number) or a lone big letter (a drop cap)
             if r["role"] in ("body", "heading", "skip", "margin") and len(text) <= 3 \
