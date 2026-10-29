@@ -263,12 +263,20 @@ class AutoChapter(ChapterBase):
             blk["source"] = " ".join(source)
         return blk
 
-    @staticmethod
-    def split_title(lab, skip, rest):
+    def weight(self, span):
+        """2 bold, 1 medium, 0 regular: how heavy a span's type is."""
+        font = span["font"]
+        if any(m in font for m in self.acfg["bold_markers"]) or span.get("flags", 0) & 16:
+            return 2
+        return 1 if re.search(r"Medi|Demi", font) else 0
+
+    def split_title(self, lab, skip, rest):
         """A title set in its own font after the label ("FIGURE 1.2 Scarcity of Resources People ..."):
-        the run of spans in the first font after the first `skip` characters (the label), when different
-        type follows. Returns (title, rest without it), or ("", rest)."""
-        spans = [s for l in lab["lines"] for s in l["spans"] if s["text"].strip()]
+        the run of spans in the first font after the first `skip` characters (the label), when lighter
+        type follows or the next font starts a new line. Italic, symbol or heavier spans inside a line of
+        plain caption ("… from S₁ to S₂", "Training on ImageNet") do not end a title.
+        Returns (title, rest without it), or ("", rest)."""
+        spans = [dict(s, line=i) for i, l in enumerate(lab["lines"]) for s in l["spans"] if s["text"].strip()]
         label = re.sub(r"\s", "", (lab["lines"][0]["text"] if lab["lines"] else "").strip()[:skip])
         taken, k = "", 0
         while k < len(spans) and len(taken) < len(label):  # the spans that make up the label (spaces aside:
@@ -287,7 +295,8 @@ class AutoChapter(ChapterBase):
             run.append(spans[k])
             k += 1
         title = re.sub(r"\s+", " ", " ".join(s["text"] for s in run)).strip(" .:|—–-")
-        if run and k < len(spans) and title and len(title) <= 120 and rest.startswith(title):
+        if (run and k < len(spans) and title and len(title) <= 120 and rest.startswith(title)
+                and (self.weight(run[0]) > self.weight(spans[k]) or spans[k]["line"] > run[-1].get("line", -1))):
             return title, rest[len(title):].strip(" .:")
         return "", rest
 
