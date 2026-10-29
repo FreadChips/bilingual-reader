@@ -42,19 +42,19 @@ def main():
     args = sys.argv[1:]
     if len(args) < 2:
         sys.exit(__doc__)
-    subject, kind = None, "book"
+    subject, material = None, "book"
     if "--subject" in args:
         i = args.index("--subject")
         subject = args[i + 1]
         del args[i:i + 2]
     if "--kind" in args:
         i = args.index("--kind")
-        kind = args[i + 1]
+        material = args[i + 1]
         del args[i:i + 2]
-    if kind not in KINDS:
+    if material not in KINDS:
         sys.exit(f"--kind must be one of {', '.join(KINDS)}")
     if subject is None:
-        subject = "经济学" if kind == "book" else ""
+        subject = "经济学" if material == "book" else ""
     root, src = Path(args[0]).resolve(), Path(args[1]).resolve()
     kind = src.suffix.lower().lstrip(".")
     if kind not in ("pdf", "epub"):
@@ -83,14 +83,16 @@ def main():
                                 capture_output=True, text=True, encoding="utf-8")
         (root / "font_profile.txt").write_text(report.stdout + report.stderr, encoding="utf-8")
     # no outline, or a paper (whose outline lists its sections): the whole document is one chapter
-    pattern = guess_chapter_pattern(labels) if labels and kind == "book" else ""
+    pattern = guess_chapter_pattern(labels) if labels and material == "book" else ""
     slug = re.sub(r"[^A-Za-z0-9]+", "-", title).strip("-")[:60] or "book"
 
     template = (HERE.parent / "templates" / f"book-{kind}.yaml").read_text(encoding="utf-8")
     text = (template.replace("{{title}}", yaml_str(title)).replace("{{author}}", yaml_str(author))
             .replace("{{subject}}", subject).replace("{{file}}", yaml_str(src.name))
-            .replace("{{pattern}}", yaml_str(pattern)).replace("{{slug}}", slug).replace("{{kind}}", kind)
-            .replace("{{focus}}", yaml_str(KINDS[kind]["focus"])).replace("{{density}}", str(KINDS[kind]["density"])))
+            .replace("{{pattern}}", yaml_str(pattern)).replace("{{slug}}", slug).replace("{{kind}}", material)
+            .replace("{{focus}}", yaml_str(KINDS[material]["focus"])).replace("{{density}}", str(KINDS[material]["density"])))
+    if material == "paper" and kind == "pdf":
+        text = text.replace("auto: {}", "auto:\n  caption_position: below     # papers set captions under figures and tables", 1)
     (root / "book.yaml").write_text(text, encoding="utf-8")
     notes = (HERE.parent / "templates" / "NOTES.md").read_text(encoding="utf-8")
     (root / "NOTES.md").write_text(notes.replace("{{title}}", title), encoding="utf-8")
@@ -105,7 +107,7 @@ def main():
         for l in matched[:5]:
             print(f"  {l}")
     else:
-        print("one chapter: the whole document is chapter 1" + ("" if kind == "paper" else " (no outline)")
+        print("one chapter: the whole document is chapter 1" + ("" if material == "paper" else " (no outline)")
               + "; check book.title")
     if kind == "pdf":
         print("next: copy any symbol fonts from font_profile.txt into layout.symbol_fonts; no other layout rules are needed")

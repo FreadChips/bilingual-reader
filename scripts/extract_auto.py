@@ -465,6 +465,9 @@ class AutoChapter(ChapterBase):
         box_heads = [re.compile(p, re.I) for p in self.acfg["box_headings"]]
         main, opened = flow, None  # opened: a box begun by a heading, running to a rule or outline heading
         runs_off = False
+        # a paper's first page: its title and the author block come before the abstract
+        front = self.book.cfg["book"].get("kind") == "paper"
+        title_seen = False
         for pno in range(self.first, self.last + 1):
             pg = self.ps.pages[pno]
             prev_y = 0
@@ -474,6 +477,17 @@ class AutoChapter(ChapterBase):
             for u in pg["ordered"]:
                 r = u["regions"][0]
                 is_head = u["kind"] == "region" and r["role"] == "heading"
+                if front and pno == self.first and u["kind"] == "region":
+                    text = region_text(r).strip()
+                    if is_head and not title_seen and first_line(r)["size"] >= 1.4 * self.ps.style["size"]:
+                        title_seen = True  # the paper's title, set large: the chapter title already
+                        continue
+                    if is_head or re.match(r"abstract\b", text, re.I):
+                        front = False
+                    elif r["role"] in ("body", "list", "quote", "caption", "margin"):
+                        continue  # authors, affiliations, e-mail addresses
+                elif front and pno > self.first:
+                    front = False
                 if is_head:
                     level = r.get("level") or 2
                     if skipping is not None and level <= skipping:

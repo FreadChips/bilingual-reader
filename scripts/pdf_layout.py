@@ -39,6 +39,8 @@ AUTO_DEFAULTS = {
     "box_headings": [],           # regexes: a heading matching one opens a box (LINK IT UP, Case Study ...)
                                   #   that runs to the next horizontal rule or outline heading
     "uncaptioned_pictures": "skip",  # skip | keep (as photos without a caption)
+    "caption_position": "nearest",  # nearest | below | above: where a figure label sits relative to its
+                                  #   picture; papers set captions below figures and tables
     "furniture_share": 0.3,       # text repeated near the top/bottom of this share of pages is dropped
     "margin_overlap": 0.3,        # a region overlapping the main column by less than this is a margin note
     "box_label_max": 40,          # a short first line set apart in a panel is the box label (FYI, Case Study)
@@ -806,6 +808,8 @@ class PageSet:
         rest = first_line(r)["text"].strip()[m.end():]
         if rest and not re.match(r"\s*([.:|—–-]|[A-Z(\"“‘]|$)", rest):
             return None  # "Figure 3 shows ..." is a sentence, not a label
+        if re.match(r"\s*\([^)]{1,30}\)\s+[a-z]", rest):
+            return None  # "Fig. 6 (middle) shows ...": a sentence pointing at a panel
         return m
 
     def inner_label(self, picture):
@@ -922,6 +926,11 @@ class PageSet:
             near = sorted((pc for pc in pics if id(pc) not in used and self.hgap(pc["bbox"], r["bbox"]) <= 60
                            and self.vgap(pc["bbox"], r["bbox"]) <= 60),
                           key=lambda pc: self.vgap(pc["bbox"], r["bbox"]) + self.hgap(pc["bbox"], r["bbox"]))
+            pos = self.acfg["caption_position"]
+            if pos in ("below", "above"):  # the caption sits under (over) its picture: prefer that one
+                side = [pc for pc in near if (pc["bbox"].y1 <= r["bbox"].y0 + 5 if pos == "below"
+                                              else pc["bbox"].y0 >= r["bbox"].y1 - 5)]
+                near = side or near
             if not near and r["role"] != "caption":
                 continue
             members = [r] + near[:1]
