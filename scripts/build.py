@@ -228,6 +228,9 @@ def write_index():
         d = json.loads(f.read_text(encoding="utf-8"))
         src_titles[d["number"]] = d["title"]
     nums = sorted({int(n) for n in BOOK.cfg["chapters"].get("titles_zh") or {}} | set(src_titles))
+    include = BOOK.cfg["chapters"].get("include")  # the chapters agreed to be done (a filing's Items)
+    if include:
+        nums = [n for n in nums if n in set(include)]
     chapters = []
     for num in nums:
         cid = f"ch{num:02d}"
