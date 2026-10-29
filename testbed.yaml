@@ -5,6 +5,7 @@
 books:
   - {name: macro, dir: 'D:/Projects/MankiwMacro'}          # Mankiw Macroeconomics, auto engine, ch1–14 annotated
   - {name: micro, dir: 'D:/Projects/ReadPDF'}              # Mankiw Principles of Microeconomics, rule engine, all annotated
+  - {name: resnet, dir: 'D:/Projects/papers/resnet'}            # ResNet paper (kind: paper), fully annotated
   - {name: auto, dir: 'D:/Projects/bilingual-testbed/auto'}  # the micro PDF through the auto engine (no annotations)
   - {name: os, dir: 'D:/Projects/bilingual-testbed/os'}      # OpenStax Principles of Economics 3e (CC BY-NC-SA)
   - {name: ax, dir: 'D:/Projects/bilingual-testbed/ax'}      # arXiv 1512.03385 (ResNet), two columns, no outline
