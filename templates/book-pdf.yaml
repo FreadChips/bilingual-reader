@@ -10,6 +10,12 @@ book:
   source_note: ''                    # shown under every chapter, e.g. 原文摘自 …，仅供个人学习使用，请勿传播。
   epub_name: {{slug}}-bilingual
 
+annotation:                          # the agreed annotation standard; agree it with the user before chapter 1
+  focus: ''                          # what the notes explain, e.g. 经济学优先：概念、机制、常见误解、读图方法、与其他章的联系
+  notes_per_100: 17                  # target subject notes per 100 sentences; hold it on every chapter
+  lang_notes: ''                     # when a language note is worth writing (the reader's English level)
+  other: ''                          # anything else agreed (sentence summaries, quiz answers, terminology)
+
 source:
   type: pdf
   engine: auto

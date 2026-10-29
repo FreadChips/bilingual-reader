@@ -9,35 +9,45 @@ Output: `reader/index.html` (interactive reader: show/cover/hide translations, n
 remembered position) and `export/<name>.epub` (offline reading on a phone). Every sentence of the book
 gets a translation; important sentences get a subject note (`n`) and occasionally a language note (`l`).
 
-The toolkit lives in this skill's `scripts/` folder. Run every script with the book folder as working
-directory (or pass `--book DIR`) and with `python -I`. Python 3.10+ needs PyMuPDF 2.x with its layout
-model, and PyYAML. If the project has no environment, create one with `python -m venv .venv`, then
-run `.venv/Scripts/pip install "pymupdf>=2" pymupdf-layout pyyaml` (about 100 MB with onnxruntime;
+The toolkit lives in this skill's `scripts/` folder. It works with any coding agent that can run
+Python and read files (Claude Code, Codex …); everything an agent needs is in this folder and in the
+book folder, nothing in an agent's private memory. The folder is its own git repository (see
+README.md): commit toolkit changes there.
+
+Run every script with the book folder as working directory (or pass `--book DIR`) and with
+`python -I`. Python 3.10+ needs PyMuPDF 2.x with its layout model, and PyYAML. If the project has no
+environment, create one with `python -m venv .venv`, then run
+`.venv/Scripts/pip install -r <this folder>/requirements.txt` (about 100 MB with onnxruntime;
 installing downloads packages, so ask the user first). `python -I -c "import pymupdf.layout"` checks it.
 Tested with pymupdf 2.0 / pymupdf-layout 2.0 on Windows.
 Below, `K` is this skill's `scripts` folder.
 
 ## Ground rules
+- **Read `NOTES.md` in the book folder first, and update it when you finish.** It holds the status of
+  every chapter, the chapter outline (for cross-references), and hand-over notes for the next chapter.
+  Another agent or session may continue where you stop, and NOTES.md is all it gets.
 - **Copyright.** Books are almost always copyrighted. Keep everything local and on the user's own devices;
   never publish the reader, the EPUB or extracted text as a hosted page or artifact. Put a
   `source_note` (仅供个人学习使用，请勿传播) in book.yaml.
 - **One chapter per round.** Extract → check the .txt → patch → annotate → build (0 problems) → check in
   the reader → hand over for approval. The user approves a chapter before the next one.
-- **Agree the standard before chapter 1** and write it into memory: subject of the notes, how many
-  notes per 100 sentences (the Mankiw book drifted from 28 to 4 and back; `quality.py` flags this),
-  when a language note is worth writing (the reader's English level).
+- **Agree the standard before chapter 1** and write it into the `annotation:` section of book.yaml:
+  what the notes focus on, how many notes per 100 sentences (the Mankiw book drifted from 28 to 4 and
+  back; `quality.py` flags this), when a language note is worth writing (the reader's English level).
+  Follow that section on every chapter; change it only when the user does.
 - **Never change extraction rules without the regression check** (step 4).
 
 ## 1. Set up the book folder
 ```
 python -I K/new_book.py BOOKDIR path/to/book.(pdf|epub) --subject 经济学
 ```
-Creates the layout (book.yaml, labels/, patches/, annotations/, build/, reader/, export/), copies the
-reader page, guesses the chapter pattern from the TOC and prints which entries it matched. Prefer an
+Creates the layout (book.yaml, NOTES.md, labels/, patches/, annotations/, build/, reader/, export/),
+copies the reader page, guesses the chapter pattern from the TOC and prints which entries it matched. Prefer an
 EPUB source whenever one exists, since its structure is already marked up. A scanned PDF (no text
 layer) needs OCR first; say so and stop.
 
-Fill in `book.title_zh`, `source_note`, and check `chapters.*_pattern` matched exactly the chapters.
+Fill in `book.title_zh`, `source_note`, the `annotation:` section (agreed with the user), and check
+`chapters.*_pattern` matched exactly the chapters. Write the chapter list into NOTES.md.
 
 ## 2. PDF only: the automatic engine
 PDFs go through the automatic engine by default. It uses a local layout model, generic rules and
@@ -55,8 +65,9 @@ rules already exist.
 python -I K/extract.py 3          # → build/source/ch03.json + ch03.txt (+ images in reader/img)
 python -I K/overlay.py 3 --review # PDF: region map of the flagged pages → build/layout/ch03/p*.png
 ```
-PDF: read the review list at the top of `build/layout/ch03.txt`. Open the overlay images with the
-image viewer you have (the Read tool in Claude Code) and fix structure with hand labels in `labels/ch03.yaml`: a role, a box, a reading order, a
+PDF: read the review list at the top of `build/layout/ch03.txt`. Open the overlay images with
+whatever image viewing your agent has (an agent that cannot view images works from
+build/layout/ch03.txt alone) and fix structure with hand labels in `labels/ch03.yaml`: a role, a box, a reading order, a
 paragraph join. The review loop and the label format are in `references/auto-layout.md`. Render a few
 unflagged pages too (`overlay.py 3 41 42`); not every problem is flagged.
 
@@ -96,9 +107,11 @@ Large chapters: split paragraphs across several paras-*.json files.
 ```
 python -I K/build.py 3           # must end with "0 problems"
 ```
-Open the reader (serve `reader/` with `python -m http.server`, or a preview/launch config) at `#ch03`,
-reload, and confirm counts of `.sent`, `.fig-card`, `.box`, `.mcq` and that the page text has no
-"undefined". Then hand the chapter to the user.
+Open the reader (serve `reader/` with `python -m http.server`, or your agent's browser preview) at
+`#ch03`, reload, and confirm counts of `.sent`, `.fig-card`, `.box`, `.mcq` and that the page text has
+no "undefined". If your agent has no browser, say so in the hand-over so the user checks the page.
+Run `quality.py` and compare the chapter's density with `annotation.notes_per_100`.
+Update NOTES.md (status line, outline, hand-over notes), then hand the chapter to the user.
 
 ## 7. Finish the book
 ```

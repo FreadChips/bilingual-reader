@@ -2,7 +2,8 @@
 
 Usage: python new_book.py DIR SOURCE.pdf|SOURCE.epub [--subject 经济学]
 
-Copies the source into DIR, creates the folder layout, the reader page and a draft book.yaml.
+Copies the source into DIR, creates the folder layout, the reader page, a draft book.yaml and
+NOTES.md (status and hand-over notes for whichever agent works on the book next).
 For an EPUB the draft is usually complete (title, author, chapter pattern from the TOC).
 For a PDF it also writes font_profile.txt (fonts, page geometry, fonts storing math symbols as
 digits); the automatic engine needs no layout rules (references/auto-layout.md).
@@ -73,6 +74,8 @@ def main():
             .replace("{{subject}}", subject).replace("{{file}}", yaml_str(src.name))
             .replace("{{pattern}}", yaml_str(pattern)).replace("{{slug}}", slug))
     (root / "book.yaml").write_text(text, encoding="utf-8")
+    notes = (HERE.parent / "templates" / "NOTES.md").read_text(encoding="utf-8")
+    (root / "NOTES.md").write_text(notes.replace("{{title}}", title), encoding="utf-8")
 
     print(f"book folder: {root}")
     print(f"source: {src.name} ({kind}), title: {title!r}, author: {author!r}")
@@ -87,6 +90,7 @@ def main():
         print("no outline: the whole document is one chapter (chapter 1); fill in book.title")
     if kind == "pdf":
         print("next: copy any symbol fonts from font_profile.txt into layout.symbol_fonts; no other layout rules are needed")
+    print("fill in book.yaml's annotation: section with the user before chapter 1")
     print("then: python extract.py --book", root, "1")
 
 

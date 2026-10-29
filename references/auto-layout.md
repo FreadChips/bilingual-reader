@@ -1,9 +1,9 @@
 # Automatic PDF engine: layout model + review + hand labels
 
 The default engine for PDF books (`source.engine: auto`, or no `layout.roles` table in book.yaml).
-Division of labour: **the program supplies the text, Claude decides the structure.** The text always
-comes from the PDF's text layer, so it is exact and the same on every run; Claude never retypes it.
-Claude looks at the region map, and records each structural decision as a hand label on a region.
+Division of labour: **the program supplies the text, the agent decides the structure.** The text always
+comes from the PDF's text layer, so it is exact and the same on every run; the agent never retypes it.
+The agent looks at the region map, and records each structural decision as a hand label on a region.
 
 ## How it works
 1. **Layout model.** The local PyMuPDF layout model (`pymupdf.layout`, ONNX, about 0.1 s a page)
@@ -108,7 +108,7 @@ Claude looks at the region map, and records each structural decision as a hand l
 ## Review loop for a chapter
 1. `extract.py N`. Read the review summary it prints, then the `## review` list in build/layout/chNN.txt.
 2. `overlay.py N --review` renders the flagged pages to build/layout/chNN/pNNNN.png. Open them with the
-   image viewer you have (the Read tool in Claude Code); an agent that cannot view images can still work from build/layout/chNN.txt. `overlay.py N` renders every page, and `overlay.py N 41 42` renders chosen pages.
+   image viewing your agent has; an agent that cannot view images can still work from build/layout/chNN.txt. `overlay.py N` renders every page, and `overlay.py N 41 42` renders chosen pages.
    - Frame colours: body blue, heading red, margin orange, caption teal, picture green, quote purple,
      skip grey; dashed grey = tinted panel.
    - Thick frames mark units: figure green, box orange, photo teal.

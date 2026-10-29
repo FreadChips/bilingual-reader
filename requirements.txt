@@ -1,0 +1,4 @@
+# tested with pymupdf 2.0, pymupdf-layout 2.0, PyYAML 6.0.3 (Windows, Python 3.13)
+pymupdf>=2.0
+pymupdf-layout>=2.0
+pyyaml>=6

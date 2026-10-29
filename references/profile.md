@@ -15,6 +15,21 @@ Everything specific to one book lives here; the scripts hold no book-specific va
 `notes.label` (default 解读). `cover` (optional): `title`, `subtitle`, `english` lines of the generated cover.
 The cover's CJK font sets Latin digits at full width: write 第八版, not 第8版.
 
+## annotation
+The annotation standard agreed with the user before chapter 1. Every agent that writes annotations
+for the book reads it, so the standard does not depend on one agent's memory.
+| key | meaning |
+| --- | --- |
+| `focus` | what the subject notes explain (经济学优先：概念、机制、常见误解、读图、章节联系) |
+| `notes_per_100` | target subject notes per 100 sentences; check each chapter against it with quality.py |
+| `lang_notes` | when a language note is worth writing, i.e. the reader's English level |
+| `other` | anything else agreed: paragraph summaries, quiz answers, fixed translations of terms |
+
+## NOTES.md
+Next to book.yaml (new_book.py creates it from templates/NOTES.md). Status of every chapter, the
+chapter outline used to check "第N章" cross-references, hand-over notes for the next chapter, and a
+short log of toolkit changes made for this book. Read it before starting; update it after each chapter.
+
 ## source
 `type: pdf | epub`, `file:` relative to the book folder.
 `engine` (PDF): `auto` (default; layout model + hand labels, see auto-layout.md and its `auto:` section)
