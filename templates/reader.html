@@ -289,12 +289,20 @@ details.hint div { margin-top: 6px; padding: 9px 12px; border-radius: 8px; backg
 .fig-card .fig-img { display: block; width: 100%; height: auto; background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 :root[data-theme="dark"] .fig-card .fig-img { filter: brightness(.92); }
 .fig-card .cap { padding: 12px 18px 4px; }
+.fig-card.has-grid { max-width: none; }  /* a table may use the whole column; a picture keeps 720px */
 .tbl-wrap { overflow-x: auto; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 table.grid { border-collapse: collapse; font-size: 13.5px; min-width: 100%; }
-table.grid th, table.grid td { padding: 5px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; white-space: nowrap; }
+table.grid.wide { font-size: 12.5px; }
+table.grid th, table.grid td { padding: 5px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
 table.grid th { font-weight: 600; background: var(--accent-soft); }
-table.grid .num { text-align: right; font-variant-numeric: tabular-nums; }
+/* labels wrap; numbers stay on one line, right-aligned */
+table.grid .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.grid th:not(.num), table.grid td:not(.num) { min-width: 6em; }
+/* the row label stays in view while a wide table scrolls sideways */
+table.grid td:first-child, table.grid th:first-child { position: sticky; left: 0; z-index: 1; min-width: 9em; max-width: 22em;
+  background: var(--surface); box-shadow: 1px 0 0 var(--border); }
 table.grid .g-zh { font-size: 12px; color: var(--text-2); margin-top: 1px; }
+@media (max-width: 640px) { table.grid td:first-child, table.grid th:first-child { min-width: 7em; max-width: 12em; } }
 .fig-card .cap .c-en { font-family: var(--serif); font-size: 14.5px; line-height: 1.6; color: var(--text); }
 .fig-card .cap .c-zh { margin-top: 4px; font-size: 14px; line-height: 1.7; color: var(--text-2); }
 .fig-card .tc-note { margin: 10px 18px 14px; padding: 9px 12px; border-radius: 8px; background: var(--accent-soft); font-size: 14px; line-height: 1.7; display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; }
@@ -460,7 +468,7 @@ body.zh-hide .math .m-zh { display: none; }
   const chapName = ch => PAPER ? ch.title_zh : `第${ch.number}章　${ch.title_zh}`;
   // a table as cells: the English cell, its translation under it when it has one; numbers right-aligned
   const NUM = /^[\s\d.,:%±+\-−–—×()\[\]†‡*\/<>=~$€£¥]*$/;
-  const gridHTML = g => `<div class="tbl-wrap"><table class="grid">${g.rows.map((row, i) => `<tr>${row.map(c => {
+  const gridHTML = g => `<div class="tbl-wrap"><table class="grid${g.rows.some(r => r.reduce((n, c) => n + c.span, 0) >= 6) ? " wide" : ""}">${g.rows.map((row, i) => `<tr>${row.map(c => {
     const tag = i < g.header ? "th" : "td", num = c.en.trim() && NUM.test(c.en);
     return `<${tag}${c.span > 1 ? ` colspan="${c.span}"` : ""}${num ? ' class="num"' : ""}><div class="g-en">${esc(c.en)}</div>`
       + `${c.zh && c.zh !== c.en ? `<div class="g-zh">${md(c.zh)}</div>` : ""}</${tag}>`;
@@ -615,7 +623,7 @@ body.zh-hide .math .m-zh { display: none; }
         const label = b.label.replace(/^Figure/, "FIGURE").replace(/^Table/, "TABLE");
         const zhLabel = (b.type === "table" ? "表 " : "图 ") + b.label.split(" ")[1];
         const img = b.src ? `<img class="fig-img" src="${b.src}" alt="${esc(b.label + " " + b.title)}" loading="lazy">` : "";
-        return `<div class="fig-card" id="${b.id}"><div class="tc-head"><div class="tc-label">${esc(label)}　${esc(zhLabel)}</div>
+        return `<div class="fig-card${b.grid ? " has-grid" : ""}" id="${b.id}"><div class="tc-head"><div class="tc-label">${esc(label)}　${esc(zhLabel)}</div>
           <div class="tc-title">${esc(b.title)}<span>${esc(b.title_zh)}</span></div></div>
           ${b.rows ? `<ol class="rows">${b.rows.map(r => `<li><div><div class="r-en">${esc(r.en)}</div><div class="r-zh zh">${md(r.zh)}</div></div></li>`).join("")}</ol>` : b.grid ? gridHTML(b.grid) : img}
           ${b.caption ? `<div class="cap"><div class="c-en">${esc(b.caption)}</div><div class="c-zh zh">${md(b.caption_zh)}</div></div>` : ""}
