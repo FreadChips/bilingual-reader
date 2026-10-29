@@ -120,16 +120,25 @@ class Reader:
 def table_grid(node):
     """{"header": n, "rows": [...]} in tablekit's format, or None for a table without numbers."""
     rows = []
+    taken = {}  # column -> rows still covered by a cell with rowspan from a row above
     for tr in _all(node, "tr"):
-        cells = []
+        cells, col = [], 0
         for td in tr.children:
             if isinstance(td, Node) and td.tag in ("td", "th"):
                 html, text, bold = inline(td)
                 try:
                     span = max(1, int(td.attrs.get("colspan") or 1))
+                    down = max(1, int(td.attrs.get("rowspan") or 1))
                 except ValueError:
-                    span = 1
-                cells.append([text, span, bold > 0.5])
+                    span, down = 1, 1
+                while taken.get(col, 0) > 0:  # a cell from a row above reaches down into this one
+                    col += 1
+                cells.append([text, span, bold > 0.5, col])
+                if down > 1:
+                    for k in range(col, col + span):
+                        taken[k] = down  # counted down below, after the row
+                col += span
+        taken = {k: v - 1 for k, v in taken.items() if v - 1 > 0}
         if cells:
             rows.append(cells)
     if not rows:
@@ -146,13 +155,7 @@ def table_grid(node):
                 if prv is not None:
                     prv[0], c[0] = prv[0] + c[0], ""
     # cells as (first column, columns covered, text, bold)
-    laid = []
-    for row in rows:
-        col, cells = 0, []
-        for c in row:
-            cells.append([col, c[1], c[0], c[2]])
-            col += c[1]
-        laid.append(cells)
+    laid = [[[c[3], c[1], c[0], c[2]] for c in row] for row in rows]
     # the emptied "$" cell and its number are one cell; other empty cells are spacers
     for cells in laid:
         k = 0
