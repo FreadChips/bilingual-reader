@@ -234,6 +234,16 @@ class AutoChapter(ChapterBase):
             first = first_line(lab)["text"].strip()[m.end():].lstrip(" .:|—–-")
             rest = strip_tags(self.join([first] + [l["markup"] for l in lab["lines"][1:]]))
             title, rest = self.split_title(lab, m.end(), rest)
+        rows = []
+        if u.get("text_table"):  # a long table of text: the title is set under the label, list items are rows
+            flush = [m for m in texts if abs(m["bbox"].x0 - lab["bbox"].x0) <= 3 and len(m["lines"]) <= 3]
+            if flush and not title:
+                title = strip_tags(self.join([l["markup"] for l in flush[0]["lines"]]))
+                texts.remove(flush[0])
+            for m in [m for m in texts if m["role"] == "list"]:
+                texts.remove(m)
+                items = re.split(r"(?:^|(?<=\s))\d{1,2}\.\s+(?=\S)", strip_tags(self.join([l["markup"] for l in m["lines"]])))
+                rows += [x.strip() for x in items if x.strip()]
         heads = [m for m in texts if m["role"] == "heading"]
         if heads and not title:
             title = strip_tags(self.join([l["markup"] for l in heads[0]["lines"]]))
@@ -261,6 +271,8 @@ class AutoChapter(ChapterBase):
                "title": title, "caption": caption, "src": f"img/{fname}"}
         if source:
             blk["source"] = " ".join(source)
+        if rows:
+            blk["rows"] = rows
         return blk
 
     def weight(self, span):

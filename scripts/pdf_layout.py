@@ -851,7 +851,12 @@ class PageSet:
                         and first_line(m)["size"] >= 0.95 * self.style["size"])
             # ... or much more text than a caption, whatever its size (an FYI box with a small figure)
             words = sum(len(region_text(m)) for m in members if m["role"] not in ("picture",) and m not in labels)
-            if len(labels) + len(inners) == 1 and prose <= 8 and words <= 1200:
+            # ... unless it is a table of text: one Table label, no picture, little body-type prose (a long
+            # list of propositions in small type is still Mankiw's Table 1, not a box)
+            text_table = (words > 1200 and len(labels) == 1 and not inners and prose <= 8
+                          and self.label_match(labels[0]).group(1).lower().startswith("tab")
+                          and not any(m["role"] == "picture" for m in members))
+            if (len(labels) + len(inners) == 1 and prose <= 8 and words <= 1200) or text_table:
                 lab = labels[0] if labels else {**inners[0][1], "bbox": p["rect"]}
                 pics = [m["bbox"] for m in members if m["role"] == "picture"]
                 outside = [m for m in members if m is not lab and m["role"] != "picture" and m["lines"]
@@ -863,7 +868,7 @@ class PageSet:
                     members = [lab if labels and m is labels[0] else m for m in members
                                if m is not src or m["role"] == "picture"]
                 if labels:
-                    units.append(self.figure_unit(lab, members, p["rect"]))
+                    units.append(dict(self.figure_unit(lab, members, p["rect"]), text_table=text_table))
                 else:
                     units.append({"kind": "figure", "regions": members, "rect": pymupdf.Rect(p["rect"]),
                                   "label_region": lab, "word": inners[0][0].group(1),
