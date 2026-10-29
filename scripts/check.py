@@ -307,7 +307,7 @@ class Checker:
                         if not all(isinstance(c, dict) and "en" in c for c in row):
                             add(f"{data_f.name}: {b.get('id')} grid row not in the built form")
                             break
-                    if not b.get("title_zh"):
+                    if b.get("title") and not b.get("title_zh"):
                         add(f"{data_f.name}: {b.get('id')} has no Chinese title")
                 elif t == "box":
                     walk(b.get("blocks", []))

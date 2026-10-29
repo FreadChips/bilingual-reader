@@ -1,6 +1,6 @@
 ---
 name: bilingual-reader
-description: Turn an English book or research paper (PDF or EPUB) into a sentence-by-sentence bilingual study edition — original sentence, Chinese translation, subject notes, figures in place — with a browser reader and a phone EPUB. Use when the user wants a book made into a 双语精读本 / 逐句对照 / 中英对照学习版, wants the next chapter of such a book, or wants to fix, check or export one.
+description: Turn an English book, research paper or financial report (PDF, EPUB, or an HTML filing such as a 10-K) into a sentence-by-sentence bilingual study edition — original sentence, Chinese translation, subject notes, figures in place — with a browser reader and a phone EPUB. Use when the user wants a book made into a 双语精读本 / 逐句对照 / 中英对照学习版, wants the next chapter of such a book, or wants to fix, check or export one.
 ---
 
 # Bilingual study edition of a book
@@ -47,6 +47,9 @@ python -I K/new_book.py PAPERDIR path/to/paper.pdf --kind paper --subject 深度
 ```
 A **paper** (`book.kind: paper`) is one chapter and one round; read `references/annotation-paper.md`
 before annotating it (its own standard, footnotes, citations, set-up steps).
+A **financial report** (`--kind filing`, an SEC 10-K saved as HTML) has its Items as chapters
+(Item 7A inside chapter 7) and its tables as grids from the HTML cells; set `chapters.include` to
+the Items agreed with the user and read `references/annotation-filing.md` (numbers check, terms).
 Creates the layout (book.yaml, NOTES.md, labels/, patches/, annotations/, build/, reader/, export/),
 copies the reader page, guesses the chapter pattern from the TOC and prints which entries it matched. Prefer an
 EPUB source whenever one exists, since its structure is already marked up. A scanned PDF (no text
@@ -149,5 +152,6 @@ Send to Kindle) and to keep it private.
 - `references/example-mankiw.yaml` — full profile of a complex textbook PDF (Mankiw, Principles 8e)
 - `references/annotation-guide.md` — annotation file format, writing standard, checks
 - `references/annotation-paper.md` — what differs for a research paper (`book.kind: paper`)
+- `references/annotation-filing.md` — what differs for a financial report (`book.kind: filing`)
 - `references/patches.md` — hand-patch operations
 - `references/lessons.md` — what went wrong on the first book and how it was fixed

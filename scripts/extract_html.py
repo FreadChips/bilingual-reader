@@ -280,8 +280,13 @@ class HtmlChapter(ChapterBase):
         self.renumber()
 
 
-def extract(book, nums):
+def items(book):
+    """The chapter numbers (Items) the document has."""
     cfg = {**HTML_DEFAULTS, **(book.cfg.get("html") or {})}
+    return set(read_chapters(book, cfg))
+
+
+def read_chapters(book, cfg):
     data = book.source.read_bytes()
     try:
         text = data.decode("utf-8")
@@ -302,6 +307,12 @@ def extract(book, nums):
                     cur = n
         if cur is not None:
             chapters[cur]["events"].append(ev)
+    return chapters
+
+
+def extract(book, nums):
+    cfg = {**HTML_DEFAULTS, **(book.cfg.get("html") or {})}
+    chapters = read_chapters(book, cfg)
     if not chapters:
         raise SystemExit("no Item headings found: check html.item_pattern")
 

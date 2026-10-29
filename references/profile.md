@@ -5,7 +5,7 @@ Everything specific to one book lives here; the scripts hold no book-specific va
 ## book
 | key | meaning |
 | --- | --- |
-| `kind` | `book` (default) or `paper`: a paper is one chapter, the reader and EPUB show no chapter numbers, and its annotation standard is in annotation-paper.md |
+| `kind` | `book` (default), `paper` or `filing` (an HTML financial report; see annotation-filing.md). A paper or a filing shows no chapter numbers. For `paper`: a paper is one chapter, the reader and EPUB show no chapter numbers, and its annotation standard is in annotation-paper.md |
 | `title`, `title_zh`, `author` | shown in the reader, the EPUB title page and metadata |
 | `subject` | 经济学, 心理学 …; notes are labelled `<subject><notes.label>` (经济学解读) |
 | `source_note` | HTML line under every chapter and on the EPUB title page: source and 仅供个人学习使用，请勿传播 |
@@ -31,8 +31,15 @@ Next to book.yaml (new_book.py creates it from templates/NOTES.md). Status of ev
 chapter outline used to check "第N章" cross-references, hand-over notes for the next chapter, and a
 short log of toolkit changes made for this book. Read it before starting; update it after each chapter.
 
+## html (`source.type: html`, a filing; all optional)
+| key | default | meaning |
+| --- | --- | --- |
+| `item_pattern` | `^Item\s+(\d+)([A-Z]?)\.\s*(.*)$` | a bold line matching it opens an Item: number, letter, title; a lettered Item goes into the chapter of its number |
+| `furniture` | running footers "… \| 2025 Form 10-K \| 20", bare page numbers, PART headings | lines dropped |
+| `heading_max` | 160 | longest bold line taken as a heading |
+
 ## source
-`type: pdf | epub`, `file:` relative to the book folder.
+`type: pdf | epub | html`, `file:` relative to the book folder.
 `engine` (PDF): `auto` (default; layout model + hand labels, see auto-layout.md and its `auto:` section)
 or `rules` (the font/position rule engine below). Without `engine`, a profile with a `layout.roles`
 table uses the rule engine.
@@ -42,6 +49,7 @@ table uses the rule engine.
   A chapter runs to the next outline entry at the same or a higher level.
 - `toc_pattern` (EPUB): regex on TOC labels, same groups. Chapters are cut at the TOC anchor and run to
   the next TOC entry at the same or a higher level, so front and back matter fall away.
+- `include`: optional list of the chapters agreed to be done (a filing: `[7, 8]`); status.py lists only these.
 - `titles_zh`: optional `{number: 中文标题}`; a chapter's meta.json `title_zh` wins. Chapters listed
   here appear in the reader's chapter list before they are built.
 

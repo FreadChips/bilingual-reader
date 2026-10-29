@@ -41,6 +41,9 @@ def notes_status(book):
 def outline_chapters(book):
     """Chapter numbers the source has, extracted or not."""
     try:
+        if book.cfg["source"]["type"] == "html":
+            from extract_html import items
+            return items(book)
         if book.cfg["source"]["type"] == "epub":
             from extract_epub import Package, chapter_entries
             return {e[0] for e in chapter_entries(Package(book.source), book.cfg)}
@@ -68,6 +71,9 @@ def main():
     checker = Checker(book)
     noted, has_notes = notes_status(book)
     nums = sorted(outline_chapters(book) | checker.chapters | set(noted))
+    include = book.cfg["chapters"].get("include")  # the chapters agreed to be done (a filing's Items 7 and 8)
+    if include:
+        nums = [n for n in nums if n in set(include)]
 
     title = book.cfg["book"]["title"] or book.root.name
     print(f"{title} — {book.root}")

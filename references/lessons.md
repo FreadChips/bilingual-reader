@@ -100,6 +100,13 @@ were needed over 17 chapters; the extraction rules changed about ten times.
 - Column cuts: the midpoint of a low-coverage band can fall inside a long row label and swallow the
   number next to it (ResNet Table 9 lost 41.5); cut where fewest rows write, never let a span cover
   a column with text of its own, and require whole phrases on both sides of a cut.
+- A 10-K's HTML tables put "$" and ")" / "%" in cells of their own and pad with empty spacer
+  columns, and rows differ in how many spacers they have. Joining any empty cell to the number on
+  its right misaligned the years; only the cell whose "$" moved into the number may join it, and
+  the columns are the positions where some row starts a filled cell. Years in a header row are
+  labels, not numbers.
+- A shell heredoc turned "\0" in Python source into a real NUL byte and the module would not load.
+  Write patch scripts with a file tool, not through the shell, whenever they contain backslashes.
 - Probe a new rule's geometry before trusting its thresholds. Mankiw's vector overbars sit within
   0.21 em of the glyph top; a radical's vinculum (2√k) and stray strokes in OpenStax and arXiv sat
   0.31–0.38 em above it, so the window is 0.25 em. Expect a few misses in running text all the same
