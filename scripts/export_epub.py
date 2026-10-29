@@ -151,6 +151,20 @@ class Chapter:
         elif b.get("rows"):
             h += "<ol class=\"rows\">" + "".join(f'<li>{esc(r["en"])}<br/><span class="zh">{md(r["zh"])}</span></li>'
                                                 for r in b["rows"]) + "</ol>"
+        elif b.get("grid"):
+            g = b["grid"]
+            h += '<div class="tbl"><table class="grid">'
+            for i, row in enumerate(g["rows"]):
+                tag_ = "th" if i < g["header"] else "td"
+                h += "<tr>"
+                for c in row:
+                    span = ' colspan="%d"' % c["span"] if c["span"] > 1 else ""
+                    zh = f'<br/><span class="zh">{md(c["zh"])}</span>' if c["zh"] and c["zh"] != c["en"] else ""
+                    h += f"<{tag_}{span}>{esc(c['en'])}{zh}</{tag_}>"
+                h += "</tr>"
+            h += "</table></div>"
+            if b.get("src"):
+                h += f'<div class="fig-img"><img src="{self.img(b["src"])}" alt="{esc(b["label"] + " " + b["title"])}"/></div>'
         elif b.get("src"):
             h += f'<div class="fig-img"><img src="{self.img(b["src"])}" alt="{esc(b["label"] + " " + b["title"])}"/></div>'
         if b.get("caption"):
@@ -443,6 +457,11 @@ p.zh, .sent .zh { margin: 0.1em 0 0; padding-left: 0.6em; border-left: 2px solid
 .principles td { padding: 0.25em 0.3em; vertical-align: top; border-top: 1px solid rgba(128,128,128,0.3); }
 .principles td.k { font-weight: bold; width: 1.5em; }
 .rows { padding-left: 1.4em; }
+.tbl { overflow-x: auto; margin: 0.6em 0; }
+table.grid { border-collapse: collapse; font-size: 0.78em; }
+table.grid th, table.grid td { padding: 0.2em 0.5em; border-bottom: 1px solid #ccc; text-align: left; vertical-align: top; }
+table.grid th { background: #eef4f3; }
+table.grid .zh { font-size: 0.9em; color: #555; }
 .titlepage h1 { margin-top: 1.2em; }
 .subtitle { font-size: 1.05em; margin: 0.6em 0; }
 .legal { font-size: 0.78em; opacity: 0.75; margin-top: 2em; }

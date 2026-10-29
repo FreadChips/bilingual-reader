@@ -39,6 +39,7 @@ AUTO_DEFAULTS = {
     "box_headings": [],           # regexes: a heading matching one opens a box (LINK IT UP, Case Study ...)
                                   #   that runs to the next horizontal rule or outline heading
     "uncaptioned_pictures": "skip",  # skip | keep (as photos without a caption)
+    "table_grid": False,          # tables as cells (tablekit.py): numbers kept, labels translated
     "caption_position": "nearest",  # nearest | below | above: where a figure label sits relative to its
                                   #   picture; papers set captions below figures and tables
     "furniture_share": 0.3,       # text repeated near the top/bottom of this share of pages is dropped
@@ -332,6 +333,44 @@ def page_lines(page, acfg):
                 continue
             lines.append(make_line(spans, l["bbox"], bi, acfg))
     return join_split_labels(lines, acfg), images
+
+
+def page_words(page, acfg, clip):
+    """Words inside clip as (x0, y0, x1, y1, text, bold), decoded like the running text (glyph_maps,
+    font_maps, symbol fonts, ligatures), so a table keeps its "=" and "+" signs. Words are split by
+    the gaps between letters, not by space characters: a phantom space after a ligature ("Outfl ow")
+    has no width."""
+    blocks = page.get_text("rawdict", clip=clip)["blocks"]
+    if acfg["glyph_maps"]:
+        decode_glyphs(page, blocks, acfg["glyph_maps"])
+    words = []
+    for b in blocks:
+        if b["type"] != 0:
+            continue
+        for l in b["lines"]:
+            if abs(l["dir"][1]) > 0.1:
+                continue
+            cur = None
+            for s in l["spans"]:
+                fmap = acfg["font_maps"].get(s["font"].split("+")[-1]) or {}
+                sym = acfg["symbol_fonts"] and s["font"].startswith(acfg["symbol_fonts"])
+                bold = bool(any(m in s["font"] for m in acfg["bold_markers"]) or s["flags"] & 16)
+                for ch in s["chars"]:
+                    c = ch["c"].translate(fmap)
+                    if sym:
+                        c = c.translate(acfg["symbol_map"])
+                    c = c.translate(LIGATURES)
+                    x0, y0, x1, y1 = ch["bbox"]
+                    if not c.strip():
+                        continue
+                    if cur and x0 - cur[2] < 0.15 * s["size"]:
+                        cur[2], cur[1], cur[3] = max(cur[2], x1), min(cur[1], y0), max(cur[3], y1)
+                        cur[4] += c
+                        cur[5] = cur[5] and bold
+                    else:
+                        cur = [x0, y0, x1, y1, c, bold]
+                        words.append(cur)
+    return [tuple(w) for w in words if pymupdf.Rect(w[:4]).intersects(clip)]
 
 
 def join_split_labels(lines, acfg):
@@ -760,7 +799,7 @@ class PageSet:
                     r["role"] = lab["role"]
                 if "level" in lab:
                     r["level"] = lab["level"]
-                for k in ("order", "after", "join", "box", "label", "keep", "continue"):
+                for k in ("order", "after", "join", "box", "label", "keep", "continue", "grid"):
                     if k in lab:
                         r["lab_" + k] = lab[k]
                 r["labelled"] = True

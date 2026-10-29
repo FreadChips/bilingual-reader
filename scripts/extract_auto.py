@@ -20,7 +20,9 @@ import pymupdf
 import yaml
 
 from chapterkit import ChapterBase, extract_each
+from tablekit import build_grid
 from pdf_layout import (BULLETS, LIGATURES, LayoutCache, PageSet, auto_config, body_style, chapter_ranges, first_line, norm,
+                        page_words,
                         same_title,
                         region_text, xy_cut)
 from textkit import Joiner, split_sentences, strip_tags
@@ -281,7 +283,31 @@ class AutoChapter(ChapterBase):
             blk["source"] = " ".join(source)
         if rows:
             blk["rows"] = rows
+        elif kind == "table" and self.acfg["table_grid"]:
+            self.table_grid(blk, u, pno)
         return blk
+
+    def table_grid(self, blk, u, pno):
+        """The table's cells from the words inside its picture box (tablekit.py); a table the grid
+        cannot read stays an image, with a review note."""
+        pics = [m for m in u["regions"] if m["role"] == "picture"]
+        where = u["label_region"] or (pics[0] if pics else u["regions"][0])
+        if any(m.get("lab_grid") is False for m in u["regions"]):
+            return  # hand label {grid: false}
+        if not pics:
+            return
+        rect = pymupdf.Rect(pics[0]["bbox"])
+        for m in pics[1:]:
+            rect |= m["bbox"]
+        page = self.doc[pno]
+        rules = [d["rect"].y0 for d in page.get_drawings()
+                 if d["rect"].height <= 1.5 and d["rect"].width >= 0.5 * rect.width
+                 and rect.x0 - 2 <= d["rect"].x0 and d["rect"].x1 <= rect.x1 + 2 and rect.y0 - 2 <= d["rect"].y0 <= rect.y1 + 2]
+        grid, why = build_grid(page_words(page, self.acfg, rect), rect, rules)
+        if grid:
+            blk["grid"] = grid
+        else:
+            self.ps.note(where, f"{blk['label']}: kept as an image, no grid ({why})")
 
     def weight(self, span):
         """2 bold, 1 medium, 0 regular: how heavy a span's type is."""

@@ -289,6 +289,12 @@ details.hint div { margin-top: 6px; padding: 9px 12px; border-radius: 8px; backg
 .fig-card .fig-img { display: block; width: 100%; height: auto; background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 :root[data-theme="dark"] .fig-card .fig-img { filter: brightness(.92); }
 .fig-card .cap { padding: 12px 18px 4px; }
+.tbl-wrap { overflow-x: auto; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+table.grid { border-collapse: collapse; font-size: 13.5px; min-width: 100%; }
+table.grid th, table.grid td { padding: 5px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; white-space: nowrap; }
+table.grid th { font-weight: 600; background: var(--accent-soft); }
+table.grid .num { text-align: right; font-variant-numeric: tabular-nums; }
+table.grid .g-zh { font-size: 12px; color: var(--text-2); margin-top: 1px; }
 .fig-card .cap .c-en { font-family: var(--serif); font-size: 14.5px; line-height: 1.6; color: var(--text); }
 .fig-card .cap .c-zh { margin-top: 4px; font-size: 14px; line-height: 1.7; color: var(--text-2); }
 .fig-card .tc-note { margin: 10px 18px 14px; padding: 9px 12px; border-radius: 8px; background: var(--accent-soft); font-size: 14px; line-height: 1.7; display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; }
@@ -452,6 +458,13 @@ body.zh-hide .math .m-zh { display: none; }
   const NOTE_LABEL = BOOK.note_label || "解读";
   const PAPER = BOOK.kind === "paper";  // a paper is one "chapter": no chapter numbers
   const chapName = ch => PAPER ? ch.title_zh : `第${ch.number}章　${ch.title_zh}`;
+  // a table as cells: the English cell, its translation under it when it has one; numbers right-aligned
+  const NUM = /^[\s\d.,:%±+\-−–—×()\[\]†‡*\/<>=~$€£¥]*$/;
+  const gridHTML = g => `<div class="tbl-wrap"><table class="grid">${g.rows.map((row, i) => `<tr>${row.map(c => {
+    const tag = i < g.header ? "th" : "td", num = c.en.trim() && NUM.test(c.en);
+    return `<${tag}${c.span > 1 ? ` colspan="${c.span}"` : ""}${num ? ' class="num"' : ""}><div class="g-en">${esc(c.en)}</div>`
+      + `${c.zh && c.zh !== c.en ? `<div class="g-zh">${md(c.zh)}</div>` : ""}</${tag}>`;
+  }).join("")}</tr>`).join("")}</table></div>`;
   document.title = `${BOOK.title_zh || BOOK.title} · 双语精读`;
   $("#brandTitle").textContent = `${BOOK.title_zh || BOOK.title} · 双语精读`;
   $("#brandSub").textContent = BOOK.title || "";
@@ -604,11 +617,11 @@ body.zh-hide .math .m-zh { display: none; }
         const img = b.src ? `<img class="fig-img" src="${b.src}" alt="${esc(b.label + " " + b.title)}" loading="lazy">` : "";
         return `<div class="fig-card" id="${b.id}"><div class="tc-head"><div class="tc-label">${esc(label)}　${esc(zhLabel)}</div>
           <div class="tc-title">${esc(b.title)}<span>${esc(b.title_zh)}</span></div></div>
-          ${b.rows ? `<ol class="rows">${b.rows.map(r => `<li><div><div class="r-en">${esc(r.en)}</div><div class="r-zh zh">${md(r.zh)}</div></div></li>`).join("")}</ol>` : img}
+          ${b.rows ? `<ol class="rows">${b.rows.map(r => `<li><div><div class="r-en">${esc(r.en)}</div><div class="r-zh zh">${md(r.zh)}</div></div></li>`).join("")}</ol>` : b.grid ? gridHTML(b.grid) : img}
           ${b.caption ? `<div class="cap"><div class="c-en">${esc(b.caption)}</div><div class="c-zh zh">${md(b.caption_zh)}</div></div>` : ""}
           ${b.n ? `<div class="tc-note"><span class="tag">解读</span><div>${md(b.n)}</div></div>` : ""}
           ${b.source ? `<div class="src">${esc(b.source)}</div>` : ""}
-          ${b.rows && img ? `<details class="orig"><summary>查看原书表格</summary>${img}</details>` : ""}</div>`;
+          ${(b.rows || b.grid) && img ? `<details class="orig"><summary>查看原书表格</summary>${img}</details>` : ""}</div>`;
       }
     }
     return "";

@@ -14,6 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # run with python -I, which leaves out the script's folder
 from bookkit import open_book  # noqa: E402
+from tablekit import needs_translation  # noqa: E402
 
 BOOK = SRC = ANN = OUT = None  # set in main()
 
@@ -51,6 +52,24 @@ def sentence_entry(src, ann):
     if ann.get("l"):
         out["l"] = ann["l"]
     return out
+
+
+def grid_entry(b, cells, problems):
+    """A table's cells with their translations (meta.json tables.ID.cells: {English cell: 中文})."""
+    rows, missing = [], []
+    for row in b["grid"]["rows"]:
+        out = []
+        for c in row:
+            text, span = (c, 1) if isinstance(c, str) else (c["t"], c["span"])
+            zh = cells.get(text, "")
+            if needs_translation(text) and not zh:
+                missing.append(text)
+            out.append({"en": text, "zh": zh, "span": span})
+        rows.append(out)
+    if missing:
+        problems.add(f"{b['id']}: {len(missing)} table cells without translation in meta.json cells, "
+                     f"e.g. {missing[0]!r}")
+    return {"header": b["grid"]["header"], "rows": rows}
 
 
 def build_chapter(num):
@@ -144,6 +163,8 @@ def build_chapter(num):
                     if len(rz) != len(b["rows"]):
                         problems.add(f"{b['id']}: {len(b['rows'])} rows, {len(rz)} translated")
                     fig["rows"] = [{"en": r, "zh": rz[i] if i < len(rz) else ""} for i, r in enumerate(b["rows"])]
+                if b.get("grid"):
+                    fig["grid"] = grid_entry(b, a.get("cells", {}), problems)
                 out.append(fig)
         return out
 

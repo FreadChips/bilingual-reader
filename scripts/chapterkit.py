@@ -244,6 +244,12 @@ def dump_txt(data):
                     out.append(f"{indent}  caption: {b['caption']}")
                 for k, r in enumerate(b.get("rows", [])):
                     out.append(f"{indent}  row{k + 1}: {r}")
+                if b.get("grid"):
+                    g = b["grid"]
+                    out.append(f"{indent}  grid: {len(g['rows'])} rows, header {g['header']}")
+                    for k, row in enumerate(g["rows"]):
+                        cells = [c if isinstance(c, str) else f"{c['t']} <span {c['span']}>" for c in row]
+                        out.append(f"{indent}  {'H' if k < g['header'] else ' '}| " + " | ".join(cells))
                 if b.get("source"):
                     out.append(f"{indent}  source: {b['source']}")
             elif t == "math":

@@ -23,6 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # run with python -I, which leaves out the script's folder
 from bookkit import open_book  # noqa: E402
+from tablekit import needs_translation  # noqa: E402
 
 PARA_KEYS = {"s", "sum"}
 SENT_KEYS = {"t", "n", "l"}
@@ -171,6 +172,13 @@ class Checker:
                 a = (meta.get("figures") or {}).get(b["id"]) or (meta.get("tables") or {}).get(b["id"]) or {}
                 if not a.get("title"):
                     add(f"{b['id']}: no translated title in meta.json figures/tables")
+                if b.get("grid"):
+                    texts = {c if isinstance(c, str) else c["t"] for row in b["grid"]["rows"] for c in row}
+                    cells = a.get("cells") or {}
+                    for c in sorted(t for t in texts if needs_translation(t) and not cells.get(t)):
+                        add(f"{b['id']}: table cell {c!r} has no translation in meta.json cells")
+                    for c in sorted(set(cells) - texts):
+                        add(f"{b['id']}: meta.json cells has {c!r}, which is not a cell of the table")
 
         # --- writing
         for f in files:
@@ -265,6 +273,10 @@ class Checker:
                 elif t in ("figure", "table"):
                     if b.get("src") and not (reader / b["src"]).exists():
                         add(f"{data_f.name}: image {b['src']} missing")
+                    for row in (b.get("grid") or {}).get("rows", []):
+                        if not all(isinstance(c, dict) and "en" in c for c in row):
+                            add(f"{data_f.name}: {b.get('id')} grid row not in the built form")
+                            break
                     if not b.get("title_zh"):
                         add(f"{data_f.name}: {b.get('id')} has no Chinese title")
                 elif t == "box":
