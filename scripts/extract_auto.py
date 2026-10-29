@@ -48,6 +48,12 @@ def ended(markup):
     return re.search(r"[.?!:;]\W*$", strip_tags(markup).rstrip()) is not None
 
 
+def label_line(lines):
+    """A label set apart: at most two short lines in capitals, no punctuation ("CASE" | "STUDY", "FYI")."""
+    text = strip_tags(" ".join(l["markup"] for l in lines)).strip()
+    return len(lines) <= 2 and len(text.split()) <= 3 and re.fullmatch(r"[A-Z][A-Z&’' -]+", text) is not None
+
+
 class AutoChapter(ChapterBase):
     def __init__(self, book, doc, chap, vocab, cache, acfg, style):
         num, title, self.first, self.last, subs = chap
@@ -175,6 +181,8 @@ class AutoChapter(ChapterBase):
             first = chunk[0]["text"].lstrip()
             if not first or first[:1] in BULLETS:
                 return False
+            if label_line(self.cur[0]):
+                return False  # a feature label set apart ("CASE STUDY") is not the start of a sentence
             if not ended(self.cur[0][-1]["markup"]):
                 return True
             return first[0].islower()
