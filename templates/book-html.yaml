@@ -1,0 +1,28 @@
+# Book profile for the bilingual-reader toolkit (schema: references/profile.md).
+# HTML source, such as an SEC filing: chapters are the Items (Item 7A goes into chapter 7).
+
+book:
+  kind: {{kind}}                     # filing (see references/annotation-filing.md)
+  title: {{title}}
+  title_zh: ''
+  author: {{author}}                 # the company
+  subject: {{subject}}               # notes are labelled "<subject>解读"
+  source_note: ''                    # e.g. 原文摘自 Apple Inc. 2025 年 Form 10-K（SEC 公开文件），中文翻译与解读为学习辅助。
+  epub_name: {{slug}}-bilingual
+
+annotation:                          # the agreed annotation standard; agree it with the user before chapter 1
+  focus: {{focus}}
+  notes_per_100: {{density}}
+  lang_notes: ''
+  other: ''
+
+source:
+  type: html
+  file: {{file}}
+
+chapters:
+  titles_zh: {}
+
+html: {}
+  # item_pattern: '^Item\s+(\d+)([A-Z]?)\.\s*(.*)$'   # bold Item headings: number, letter, title
+  # furniture: ['\|\s*\d{4}\s+Form\s+10-[KQ]\s*\|\s*\d+\s*$']   # running footers and other page furniture

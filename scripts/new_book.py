@@ -1,6 +1,6 @@
 """Set up a book folder for the bilingual-reader toolkit.
 
-Usage: python new_book.py DIR SOURCE.pdf|SOURCE.epub [--subject 经济学] [--kind book|paper]
+Usage: python new_book.py DIR SOURCE.pdf|SOURCE.epub|SOURCE.html [--subject 经济学] [--kind book|paper|filing]
 
 Copies the source into DIR, creates the folder layout, the reader page, a draft book.yaml and
 NOTES.md (status and hand-over notes for whichever agent works on the book next).
@@ -23,6 +23,8 @@ KINDS = {
     "book": {"focus": "", "density": 17},
     "paper": {"focus": "问题与贡献、方法原理、实验怎么读、背景与后续影响（references/annotation-paper.md）",
               "density": 25},
+    "filing": {"focus": "科目与会计处理、数字怎么来怎么勾稽、经营分析、风险与值得留意的地方（references/annotation-filing.md）",
+               "density": 20},
 }
 
 
@@ -54,11 +56,12 @@ def main():
     if material not in KINDS:
         sys.exit(f"--kind must be one of {', '.join(KINDS)}")
     if subject is None:
-        subject = "经济学" if material == "book" else ""
+        subject = {"book": "经济学", "filing": "财报"}.get(material, "")
     root, src = Path(args[0]).resolve(), Path(args[1]).resolve()
     kind = src.suffix.lower().lstrip(".")
-    if kind not in ("pdf", "epub"):
-        sys.exit("the source must be a .pdf or .epub file")
+    kind = "html" if kind == "htm" else kind
+    if kind not in ("pdf", "epub", "html"):
+        sys.exit("the source must be a .pdf, .epub or .html file")
     if (root / "book.yaml").exists():
         sys.exit(f"{root / 'book.yaml'} already exists")
     for d in ("labels", "patches", "annotations", "build/source", "reader/data", "reader/img", "export"):
@@ -73,6 +76,11 @@ def main():
         pkg = Package(root / src.name)
         title, author = pkg.title or title, pkg.author
         labels = [e[0] for e in pkg.toc]
+    elif kind == "html":
+        import re as _re
+        raw = (root / src.name).read_bytes().decode("utf-8", errors="replace")
+        m = _re.search(r"<title>(.*?)</title>", raw, _re.S | _re.I)
+        title = _re.sub(r"\s+", " ", m.group(1)).strip() if m else title
     else:
         import pymupdf
         doc = pymupdf.open(root / src.name)
@@ -83,7 +91,7 @@ def main():
                                 capture_output=True, text=True, encoding="utf-8")
         (root / "font_profile.txt").write_text(report.stdout + report.stderr, encoding="utf-8")
     # no outline, or a paper (whose outline lists its sections): the whole document is one chapter
-    pattern = guess_chapter_pattern(labels) if labels and material == "book" else ""
+    pattern = guess_chapter_pattern(labels) if labels and material == "book" and kind != "html" else ""
     slug = re.sub(r"[^A-Za-z0-9]+", "-", title).strip("-")[:60] or "book"
 
     template = (HERE.parent / "templates" / f"book-{kind}.yaml").read_text(encoding="utf-8")

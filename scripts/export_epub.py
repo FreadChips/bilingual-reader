@@ -323,7 +323,7 @@ def title_page(book, chapters):
 <p class="eyebrow">{esc(BOOK.cfg["book"]["author"])}</p>
 <h1>{esc(book["title"])}<br/><span class="zh">{esc(book["title_zh"])}</span></h1>
 <p class="subtitle">双语精读本 · 原文 / 译文 / {esc(SUBJECT)}{NOTE}</p>
-<p class="stats">{"" if PAPER else f"{len(chapters)} 章 · "}{n_sent:,} 句</p>
+<p class="stats">{"" if len(chapters) == 1 else f"{len(chapters)} 章 · "}{n_sent:,} 句</p>
 <div class="guide"><p class="guide-title">阅读说明</p>
 <p>每句英文原文下面紧跟中文译文。重要的地方附有说明：</p>
 <p>{tag(NOTE, "econ")}{esc(SUBJECT)}{NOTE}：{"问题与贡献、方法原理、实验读法，以及背景与后续影响。" if PAPER else "概念、逻辑、图表读法，以及与其他章节的联系。"}</p>
@@ -506,7 +506,7 @@ def main():
     # a stable identifier, so a reading app treats a re-export as the same book
     BOOK_ID = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, b.get("epub_id") or f'readpdf/{b["epub_name"]}'))
     NOTE, SUBJECT = BOOK.cfg["notes"]["label"], b["subject"]
-    PAPER = b.get("kind") == "paper"
+    PAPER = b.get("kind") in ("paper", "filing")
     book = load_js(DATA / "book.js", "BOOK_INDEX")
     img = Images()
     chapters = [Chapter(load_js(DATA / f'{c["id"]}.js', "BOOK_DATA["), img) for c in book["chapters"] if c["available"]]

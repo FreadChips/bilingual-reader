@@ -456,7 +456,7 @@ body.zh-hide .math .m-zh { display: none; }
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const md = s => esc(s || "").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   const NOTE_LABEL = BOOK.note_label || "解读";
-  const PAPER = BOOK.kind === "paper";  // a paper is one "chapter": no chapter numbers
+  const PAPER = BOOK.kind === "paper" || BOOK.kind === "filing";  // no chapter numbers (a paper, a filing's Items)
   const chapName = ch => PAPER ? ch.title_zh : `第${ch.number}章　${ch.title_zh}`;
   // a table as cells: the English cell, its translation under it when it has one; numbers right-aligned
   const NUM = /^[\s\d.,:%±+\-−–—×()\[\]†‡*\/<>=~$€£¥]*$/;
@@ -715,7 +715,7 @@ body.zh-hide .math .m-zh { display: none; }
       <div class="zh-title">${esc(ch.title_zh)}</div>
       <div class="stats">${ch.pages[0] != null ? `<span>原书 p.${ch.pages[0]}–${ch.pages[1]}</span>` : ""}<span>${paras.length} 段 · ${nSent} 句</span><span>${ch.glossary.length} 个术语</span>${nFig ? `<span>${nFig} 个图表</span>` : ""}${appendix.length ? `<span>含附录</span>` : ""}</div>
       <button class="resume" id="resume"></button></div>`;
-    if (ch.guide && ch.guide.length) h += `<div class="guide"><h3>${PAPER ? "导读" : "本章导读"}</h3>${ch.guide.map(p => `<p>${md(p)}</p>`).join("")}</div>`;
+    if (ch.guide && ch.guide.length) h += `<div class="guide"><h3>${BOOK.kind === "paper" ? "导读" : "本章导读"}</h3>${ch.guide.map(p => `<p>${md(p)}</p>`).join("")}</div>`;
     h += ch.blocks.map(b => blockHTML(ch, b)).join("");
     h += endHTML(ch);
     if (appendix.length) {

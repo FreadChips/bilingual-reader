@@ -150,12 +150,12 @@ def build_chapter(num):
                 out.append({"type": "quickquiz", "id": b["id"], "page": b["page"], "items": items})
             elif t in ("table", "figure"):
                 a = ann.get("figures", {}).get(b["id"]) or ann.get("tables", {}).get(b["id"], {})
-                if not a.get("title"):
+                if b.get("title") and not a.get("title"):
                     problems.add(f"{b['id']}: title without translation")
                 if b.get("caption") and not a.get("caption"):
                     problems.add(f"{b['id']}: caption without translation")
                 fig = {"type": t, "id": b["id"], "label": b["label"], "title": b.get("title", ""),
-                       "title_zh": a.get("title", ""), "n": a.get("n", ""), "src": b["src"], "page": b["page"],
+                       "title_zh": a.get("title", ""), "n": a.get("n", ""), "src": b.get("src", ""), "page": b["page"],
                        "caption": b.get("caption", ""), "caption_zh": a.get("caption", ""),
                        "source": b.get("source", "")}
                 if b.get("rows"):

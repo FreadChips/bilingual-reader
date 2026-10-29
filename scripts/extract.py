@@ -28,8 +28,10 @@ def main():
         import extract_pdf as engine
     elif kind == "epub":
         import extract_epub as engine
+    elif kind == "html":
+        import extract_html as engine
     else:
-        sys.exit(f"source.type must be pdf or epub, not {kind!r}")
+        sys.exit(f"source.type must be pdf, epub or html, not {kind!r}")
     engine.extract(book, nums)
 
 

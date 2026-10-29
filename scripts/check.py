@@ -170,7 +170,7 @@ class Checker:
                 add(f"heading {b['id']}: no translation in meta.json headings")
             if b["type"] in ("figure", "table"):
                 a = (meta.get("figures") or {}).get(b["id"]) or (meta.get("tables") or {}).get(b["id"]) or {}
-                if not a.get("title"):
+                if b.get("title") and not a.get("title"):
                     add(f"{b['id']}: no translated title in meta.json figures/tables")
                 if b.get("grid"):
                     texts = {c if isinstance(c, str) else c["t"] for row in b["grid"]["rows"] for c in row}
@@ -236,7 +236,37 @@ class Checker:
             if stale:
                 add(f"reader/data/{cid}.js differs from the source or annotations in {stale} sentences: run build.py {num}")
         stats = {"sentences": n_sent, "notes": n_note, "lang": n_lang, "density": density}
+        if self.book.cfg["book"].get("kind") == "filing":
+            stats["unmatched"] = self.unmatched_numbers(src, files)
         return problems, stats
+
+    @staticmethod
+    def unmatched_numbers(src, files):
+        """Numbers in the notes of a filing that appear nowhere in the chapter's text and tables:
+        either worked out in the note (a difference, a ratio) or a mistake. Listed, not failed."""
+        def numbers(text):
+            out = set()
+            for m in re.finditer(r"(?<![\w.])\d{1,3}(?:,\d{3})+(?:\.\d+)?|(?<![\w.,])\d+\.\d+|(?<![\w.,])\d{3,}", text):
+                v = m.group(0).replace(",", "")
+                if not re.fullmatch(r"(19|20)\d\d", v):  # years
+                    out.add(v.rstrip("0").rstrip(".") if "." in v else v)
+            return out
+        source = json.dumps(src, ensure_ascii=False)
+        known = numbers(source)
+        notes = []
+        for f in files:
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            for path, text in strings(data):
+                if path.endswith(".n") or path == "n" or ".n." in path or path.endswith("guide") or "guide[" in path:
+                    notes.append((f.name + " " + path, text))
+        out = []
+        for where, text in notes:
+            for v in sorted(numbers(text) - known):
+                out.append(f"{where}: {v}")
+        return out
 
     def check_data(self, data_f, add):
         text = data_f.read_text(encoding="utf-8")
@@ -308,6 +338,10 @@ def main():
             print(f"  ! … and {len(problems) - 40} more")
         dens = f", {st['sentences']} sentences, {st['notes']} notes ({st['density']:.1f}/100), {st['lang']} lang" if st else ""
         print(f"ch{num:02d}: {'ok' if not problems else f'{len(problems)} problems'}{dens}")
+        if st and st.get("unmatched"):
+            print(f"  numbers in notes not found in the chapter ({len(st['unmatched'])}; check each is worked out correctly):")
+            for u in st["unmatched"]:
+                print(f"    {u}")
         bad += bool(problems)
     if checker.target:
         print(f"target {checker.target} notes per 100 sentences, minimum {checker.minimum:.1f}")
