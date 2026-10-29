@@ -83,6 +83,15 @@ were needed over 17 chapters; the extraction rules changed about ten times.
 - A crash used to stop `extract.py all`; now each chapter runs on its own and the failures are
   listed at the end with a non-zero exit, and regress_all.py also flags any chapter file a run did
   not rewrite.
+- A test book's drift went unreviewed for two days (Oct 27–29) while every regression read clean,
+  because each round only compared with the round before. Scoring both versions against the
+  hand-tuned book found a net gain with five regressions hidden in it, one of which lost text (a
+  side caption under a grown picture box). Each came from a rule written for another book: a
+  1,200-character box limit (macro FYI boxes) that broke a long text table, a title rule that cut at
+  any font change, a heading-tail rule that fired on a whole region. Score against a reference, not
+  only against the last snapshot, after a run of engine changes.
+- Fix engine rules in a git worktree and test on copies when another agent is working on a book:
+  the skill is linked into every agent, so an edit in place changes its next extraction at once.
 - Probe a new rule's geometry before trusting its thresholds. Mankiw's vector overbars sit within
   0.21 em of the glyph top; a radical's vinculum (2√k) and stray strokes in OpenStax and arXiv sat
   0.31–0.38 em above it, so the window is 0.25 em. Expect a few misses in running text all the same

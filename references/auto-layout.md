@@ -57,11 +57,21 @@ The agent looks at the region map, and records each structural decision as a han
      When there are several candidates, the one the PDF outline confirms wins.
    - A run-in heading set in another typeface at the start of a paragraph ("Used Goods When …") is
      marked bold.
+   - A region whose first lines are an outline entry word for word, in one font, followed by a line
+     opening in another font, is split: the heading becomes its own region and the rest gets the id
+     with a "b" suffix (p173.r5b). The model sometimes boxes a heading line with the paragraph under it.
+   - A heading that ends with a full stop is body text ("decades.", "Shut down if TR < VC."), except
+     in title case: a news headline such as "Income Inequality Is Not Rising Globally. It's Falling."
+   - A label set apart in capitals ("CASE" | "STUDY", KEY CONCEPTS, WORK IT OUT: at most two short
+     lines, no punctuation) never runs on into the next paragraph.
    - A picture region the model drew round only the labels of a vector drawing grows over the drawing's
      paths, leaving out frames and tints around it.
 3. **Units.**
    - A tinted panel holding one "Figure N / Table N" label and little text (at most 8 lines in body
      type and 1,200 characters in all) is a figure.
+   - A longer panel is still a table when it holds one Table label, no picture and at most 8 lines of
+     body-type prose (Mankiw's Table 1: twenty propositions in small type). Its title is the text set
+     under the label, and its list items become `rows`, translated row by row.
    - Any other panel with text is a box: a short first line is its label, a heading under it its
      title. If the box also holds figures, the figures inside are found separately. A panel is a
      tinted rectangle, a stroked frame (rounded or not) or an image under text.
@@ -69,7 +79,11 @@ The agent looks at the region map, and records each structural decision as a han
    - A label outside a panel takes the nearest picture and the caption or margin lines under it. A label
      printed inside a picture also counts, and the lines from the label on are its title and caption.
    - The figure title is the run in its own type after the label ("FIGURE 1.2 **Scarcity of
-     Resources** People …"), else the caption's first sentence.
+     Resources** People …"), else the caption's first sentence. The run ends a title only when lighter
+     type follows or the next font starts a new line: an italic variable, a symbol or a heavier word
+     inside a caption line ("… from *S*₁ to *S*₂", "Training on **ImageNet**") does not end it.
+   - Text set flush under the label (same left edge) is the title and caption even when the picture
+     box, grown over the drawing, covers it (Mankiw's captions set beside the chart).
    - Other pictures are photos with an adjacent caption. By default, pictures without a caption are
      left out (`auto.uncaptioned_pictures: keep` to keep them).
      A picture with no caption takes a short heading set right above it as its title (Mankiw's
@@ -241,7 +255,11 @@ Two more layouts, with no reference to score against, were checked by reading th
 
 What it still gets wrong, so check for these:
 - boxes without a tinted panel (Mankiw's Case Study), and banners such as Quick Quiz;
-- labels set beside the text they belong to ("CASE STUDY" read into a paragraph);
+- labels set beside the text they belong to: "CASE STUDY" now stands as its own paragraph, but when
+  the model puts the "STUDY" line inside the paragraph's region it lands mid-sentence ("being private
+  STUDY goods");
+- an in-text figure reference at the start of a line ("Fig. 6 (middle) shows …") read as a figure label
+  (arXiv ResNet);
 - end-of-chapter quizzes, which become headings and paragraphs, not a quiz;
 - equations stored as digits, when `symbol_fonts` is not set;
 - cartoon captions with no detected picture, which become side notes;
