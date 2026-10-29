@@ -92,6 +92,14 @@ were needed over 17 chapters; the extraction rules changed about ten times.
   only against the last snapshot, after a run of engine changes.
 - Fix engine rules in a git worktree and test on copies when another agent is working on a book:
   the skill is linked into every agent, so an edit in place changes its next extraction at once.
+- PyMuPDF's find_tables read a LaTeX table's numbers as "2807 ." and scrambled letters; the words
+  of the text layer are exact, so tablekit.py builds the grid from word positions itself. Raw
+  words still dropped "=" and "+" set in Mathematical Pi ("Exports Imports"): table words must go
+  through the same decoding as the running text (pdf_layout.page_words). Check a few grids per
+  book against the image, including one with symbols.
+- Column cuts: the midpoint of a low-coverage band can fall inside a long row label and swallow the
+  number next to it (ResNet Table 9 lost 41.5); cut where fewest rows write, never let a span cover
+  a column with text of its own, and require whole phrases on both sides of a cut.
 - Probe a new rule's geometry before trusting its thresholds. Mankiw's vector overbars sit within
   0.21 em of the glyph top; a radical's vinculum (2√k) and stray strokes in OpenStax and arXiv sat
   0.31–0.38 em above it, so the window is 0.25 em. Expect a few misses in running text all the same

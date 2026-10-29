@@ -32,7 +32,7 @@ bullets and quotes). Split a long chapter over `paras-1.json`, `paras-2.json`, �
 | `guide` | 本章导读: a list of 2–4 paragraph strings (markdown **bold**); a single string is split at blank lines |
 | `headings` | `{heading id: 中文标题}` for every heading in the .txt (`h3-2`, `hA1` …) |
 | `boxes` | `{box id: {label, title, intro, headline, byline, author, source}}` — translate the fields the box has |
-| `figures` / `tables` | `{fig1: {title, caption, n, rows}}` — `n` is the figure note; `rows` one per source row |
+| `figures` / `tables` | `{fig1: {title, caption, n, rows, cells}}` — `n` is the figure note; `rows` one per source row; `cells` for a table with a grid (below) |
 | `photos` | `{img01: {zh: caption translation, n: optional note}}` |
 | `glossary` | `{term in lower case: {zh, def}}` for the chapter's key terms (margin definitions) |
 | `quickquiz` | `{qq01: [{zh, hint}, …]}` one per quiz item; `hint` is 参考思路 |
@@ -40,6 +40,14 @@ bullets and quotes). Split a long chapter over `paras-1.json`, `paras-2.json`, �
 | `math` | `{eq01: translated equation HTML}` when an equation contains words |
 | `end` | `{quiz: {cq1: {stem, options: {a..d}, answer, explain}}, summary: {sum1: …}}` |
 | `appendix_guide` | guide paragraphs for an appendix |
+
+**Tables as cells.** A table the engine read as a grid (`grid:` lines in the .txt, `H|` marks header
+rows) needs `cells`: one entry per distinct cell text that holds an English word in lower case,
+`{"top-1 err.": "top-1 错误率", "18 layers": "18 层"}`. Numbers, symbols and names such as "ResNet-34"
+need none; a name with a lower-case word ("BN-inception [16]") may map to itself. The reader shows
+each cell's translation under it, and keeps the table image under "查看原书表格". build.py and
+check.py list missing and stale cells. Read the grid against the image before translating; if it
+is wrong, turn it off with the hand label `{grid: false}` on the table's label or picture region.
 
 Glossary keys are lower case even when the term is capitalised in the book (build lower-cases terms);
 keep curly apostrophes as in the source (`arrow’s impossibility theorem`).

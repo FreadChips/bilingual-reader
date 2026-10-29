@@ -102,6 +102,16 @@ The agent looks at the region map, and records each structural decision as a han
      beside it (Mankiw sets many captions to the right of the chart). Tables are skipped: the bold
      text inside a table is its header row.
    - Sections named in `auto.skip_sections` (References, Bibliography …) are dropped.
+   - With `auto.table_grid`, a table also gets its cells (`grid`), read by tablekit.py from the
+     words inside its picture box, decoded like the running text (symbol fonts keep their = and +):
+     rows are words on one line; columns are the bands that almost no row writes across (a header
+     over two columns does not close the gap), cut where fewest rows write and only where whole
+     phrases lie on both sides in enough rows; a phrase over several columns is one cell with a
+     span; a body line that only continues the text of the row above is merged into it; header
+     rows are those above the first rule, else the leading bold rows, and stacked header lines with
+     no spans become one row. Refused: tables with many empty body cells (cells broken over lines),
+     rows of a single cell, or symbol-font characters left undecoded. Tested: ResNet 13 of 14
+     tables, OpenStax about 4 in 5, Mankiw micro 10 of 19 and macro 16 of 23.
 
    A PDF without an outline (an article, a paper) is one chapter, and so is any `book.kind: paper`.
    In a paper the first page's title (set large) and the author block before the abstract (or the
@@ -158,6 +168,7 @@ p338.r5: {keep: true}             # keep this uncaptioned picture as a photo (a 
 p383.r2: {continue: tab12-2}      # this picture is the rest of table 12-2 (continued on a later page):
                                   #   it is stacked under the table's image instead of becoming a photo
 p73.r9: {join: true}              # on a panel box's first region: the box continues the previous box
+p7.r2: {grid: false}              # on a table's label or picture: keep it as an image, no grid
 p441.r4: {join: true}             # on a heading right after another heading: its second line, set apart
                                   #   ("An Alternative Theory:" | "The Imperfect-Information Model")
 ```
@@ -174,6 +185,7 @@ refinement. A label naming a region that does not exist stops the extraction.
 | `skip_sections` | References, Bibliography, Works Cited, Notes, Index | headings whose section is dropped |
 | `box_headings` | [] | regexes for feature headings that open a box (`['LINK IT UP', 'CLEAR IT UP', 'WORK IT OUT']`) |
 | `uncaptioned_pictures` | skip | skip / keep |
+| `table_grid` | false (new books: true) | tables as cells: tablekit.py reads rows and columns from the words in the table's picture box; a table it cannot read stays an image with a review note |
 | `caption_position` | nearest | nearest / below / above: a label outside a panel takes the picture above it (`below`: the caption sits under its figure, as in papers) or under it, falling back to the nearest |
 | `furniture_share` | 0.3 | share of pages a repeated top/bottom text must reach to be dropped |
 | `margin_overlap` | 0.3 | a region overlapping the main column by less than this share is margin |

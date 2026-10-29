@@ -86,6 +86,9 @@ Then read `ch03.txt` top to bottom. Look for:
 - captions swallowing body text, or figures missing;
 - end-of-chapter quiz numbering.
 
+Tables read as cells show as `grid:` lines (`H|` = header row): compare each with its image
+(reader/img); turn a wrong one off with `{grid: false}` on its label region.
+
 Fix wording the source encodes badly with a patch (`patches/ch03.json`, ops in
 `references/patches.md`). Fix anything that recurs (≈3+ times) with a rule in book.yaml instead
 (`auto.rules` for PDFs).
