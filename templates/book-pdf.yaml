@@ -31,7 +31,8 @@ layout: {}
   # symbol_map: {"5": "=", "3": "×", "2": "−", "1": "+", ",": "<", ".": ">"}
   # page_offset: 0                   # only when the PDF has no page labels: PDF index − printed page number
 
-auto: {}
+auto:
+  table_grid: true                 # tables as cells (numbers kept, labels translated in meta.json cells)
   # rules:                           # region rules for fixes that recur across chapters; first match wins
   #   - {role: skip, text_starts: "To find additional study resources"}
   #   - {role: heading, level: 2, cls: text, font_has: Bold, lines_max: 1}

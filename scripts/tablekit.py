@@ -128,6 +128,17 @@ def build_grid(words, rect, rules=()):
             k += 1
         if 0 < k < len(laid) and not all(r["bold"] for r in laid):
             header = k
+    # header lines stacked in the same columns ("LOC" over "method"), none spanning: one header row
+    while header >= 2:
+        a, b = laid[header - 2], laid[header - 1]
+        spans = any(r["ends"][k] > k for r in (a, b) for k in r["placed"])
+        if spans:
+            break
+        for k in range(ncol):
+            a["cells"][k] = (a["cells"][k] + " " + b["cells"][k]).strip()
+        a["placed"] |= b["placed"]
+        del laid[header - 1]
+        header -= 1
     # a body cell wrapped onto the next line ("Represents a movement along the" | "curve"): that line
     # only has text under text of the row above, starting in lower case or after an unfinished line
     merged = laid[:max(header, 1)]

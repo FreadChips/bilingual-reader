@@ -92,7 +92,7 @@ def main():
             .replace("{{pattern}}", yaml_str(pattern)).replace("{{slug}}", slug).replace("{{kind}}", material)
             .replace("{{focus}}", yaml_str(KINDS[material]["focus"])).replace("{{density}}", str(KINDS[material]["density"])))
     if material == "paper" and kind == "pdf":
-        text = text.replace("auto: {}", "auto:\n  caption_position: below     # papers set captions under figures and tables", 1)
+        text = text.replace("auto:\n", "auto:\n  caption_position: below          # papers set captions under figures and tables\n", 1)
     (root / "book.yaml").write_text(text, encoding="utf-8")
     notes = (HERE.parent / "templates" / "NOTES.md").read_text(encoding="utf-8")
     (root / "NOTES.md").write_text(notes.replace("{{title}}", title), encoding="utf-8")
