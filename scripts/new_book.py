@@ -120,7 +120,11 @@ def main():
     if kind == "pdf":
         print("next: copy any symbol fonts from font_profile.txt into layout.symbol_fonts; no other layout rules are needed")
     print("fill in book.yaml's annotation: section with the user before chapter 1")
-    print("then: python extract.py --book", root, "1")
+    if kind == "html":
+        print("chapters are the filing's Items (7A goes into 7): set chapters.include in book.yaml to the Items agreed")
+        print("then: python extract.py --book", root, "7")
+    else:
+        print("then: python extract.py --book", root, "1")
 
 
 if __name__ == "__main__":
